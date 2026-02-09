@@ -3,9 +3,10 @@ name = "gcgaap"
 version = "0.2.0"
 description = "GnuCash GAAP Validation and Reporting - A Python CLI tool for validating and generating GAAP-style reports from GnuCash books"
 authors = [
-    {name = "Conrad"}
+    {name = "Conrad Storz"}
 ]
 readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.10"
 dependencies = [
     "piecash>=1.2.0",  # GnuCash file access via SQLAlchemy
