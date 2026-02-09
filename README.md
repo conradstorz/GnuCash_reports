@@ -156,8 +156,10 @@ gcgaap/
 
 ## License
 
-(Add your license here)
+MIT License - see [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2026 Conrad Storz
 
 ## Contributing
 
-(Add contribution guidelines here)
+Contributions are welcome! Please feel free to submit issues or pull requests.
