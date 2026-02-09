@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "entities": {
+    "storz_amusements_llc": {
+      "label": "Storz Amusements LLC",
+      "type": "business"
+    },
+    "storz_cash_services_llc": {
+      "label": "Storz Cash Services LLC",
+      "type": "business"
+    },
+    "storz_property_management_llc": {
+      "label": "Storz Property Management LLC",
+      "type": "business"
+    },
+    "personal": {
+      "label": "Personal Finances",
+      "type": "individual"
+    }
+  },
+  "accounts": {},
+  "patterns": {
+    "storz_amusements_llc": [
+      "^[^:]+:Storz\\ Amusements\\ LLC.*",
+      ".*:Storz\\ Amusements\\ LLC.*",
+      ".*SAM[_\\ ].*",
+      ".*SAMUSE.*",
+      "^Liabilities\\ root:Loans:Storz\\ Amusements\\ LLC.*",
+      ".*OB\\ Storz\\ Amusements\\ LLC.*"
+    ],
+    "storz_cash_services_llc": [
+      "^[^:]+:Storz\\ Cash\\ Services\\ LLC.*",
+      ".*:Storz\\ Cash\\ Services\\ LLC.*",
+      ".*:Storz\\ Cash\\ Services.*",
+      ".*SCS[_\\ ].*",
+      ".*Income\\ root:Storz\\ Cash\\ Services.*",
+      "^Liabilities\\ root:Loans:Storz\\ Cash\\ Services.*",
+      ".*OB\\ Storz\\ Cash\\ Services\\ LLC.*"
+    ],
+    "storz_property_management_llc": [
+      "^[^:]+:Storz\\ Property\\ Management\\ LLC.*",
+      ".*:Storz\\ Property\\ Management\\ LLC.*",
+      ".*:Storz\\ Property\\ Management.*",
+      ".*SPM[_\\ ].*",
+      ".*SPMLLC.*",
+      ".*Income\\ root:Storz\\ Property\\ Management.*"
+    ],
+    "personal": [
+      "^Equity:Home.*",
+      "^Liabilities:Personal.*",
+      "^Assets:Personal.*",
+      "^Liabilities:Family.*",
+      "^Assets:Home.*",
+      "^Liabilities:Home.*",
+      "^Equity:Family.*",
+      "^Equity:Personal.*",
+      "^Assets:Family.*",
+      ".*3023\\ Old\\ Hill.*",
+      ".*3023\\ Old\\ hill.*",
+      ".*Investments\\ root.*",
+      ".*Retirement.*",
+      ".*Schwab.*",
+      ".*LEDGER\\ WALLET.*",
+      ".*Coinbase.*",
+      "^Assets\\ root$",
+      "^Liabilities\\ root$",
+      "^Income\\ root$",
+      "^Expenses\\ root$",
+      "^Equity\\ root$",
+      "^Equity\\ root:Opening\\ Balances\\ root$",
+      "^Equity\\ root:Owners\\ Investments$",
+      "^All\\ Bank\\ Checking.*",
+      "^Imbalance-USD$",
+      "^Orphan-USD$",
+      "^Receivables$",
+      ".*L&N.*",
+      ".*Chase\\ Amazon.*",
+      ".*American\\ Express.*",
+      ".*Citibank\\ Costco.*",
+      "^Liabilities\\ root:Credit\\ Cards.*",
+      "^Liabilities\\ root:Accounts\\ Payable.*",
+      "^Liabilities\\ root:Sales\\ Tax.*",
+      "^Assets\\ root:Fixed\\ Assets\\ root$",
+      "^Assets\\ root:Current\\ Assets\\ root$",
+      "^Liabilities\\ root:Loans$"
+    ]
+  },
+  "pattern_descriptions": {
+    "storz_amusements_llc": [
+      "Matches any account path where 'Storz Amusements LLC' appears after the first colon (e.g., 'Assets:Storz Amusements LLC:Checking')",
+      "Matches any account with 'Storz Amusements LLC' anywhere in the path",
+      "Matches accounts using the 'SAM' abbreviation (Storz Amusements)",
+      "Matches accounts using 'SAMUSE' abbreviation",
+      "Matches Storz Amusements loans under Liabilities",
+      "Matches Opening Balance accounts for Storz Amusements LLC"
+    ],
+    "storz_cash_services_llc": [
+      "Matches any account path where 'Storz Cash Services LLC' appears after the first colon (e.g., 'Expenses:Storz Cash Services LLC:Supplies')",
+      "Matches any account with 'Storz Cash Services LLC' anywhere in the path",
+      "Matches any account with 'Storz Cash Services' (without LLC)",
+      "Matches accounts using the 'SCS' abbreviation (Storz Cash Services)",
+      "Matches Storz Cash Services income accounts",
+      "Matches Storz Cash Services loans under Liabilities",
+      "Matches Opening Balance accounts for Storz Cash Services LLC"
+    ],
+    "storz_property_management_llc": [
+      "Matches any account path where 'Storz Property Management LLC' appears after the first colon (e.g., 'Assets:Storz Property Management LLC:Property')",
+      "Matches any account with 'Storz Property Management LLC' anywhere in the path",
+      "Matches any account with 'Storz Property Management' (without LLC)",
+      "Matches accounts using the 'SPM' abbreviation (Storz Property Management)",
+      "Matches accounts using 'SPMLLC' abbreviation",
+      "Matches Storz Property Management income accounts"
+    ],
+    "personal": [
+      "Matches all Equity accounts starting with 'Home' (e.g., 'Equity:Home Equity')",
+      "Matches all Liabilities accounts starting with 'Personal' (e.g., 'Liabilities:Personal Loan')",
+      "Matches all Assets accounts starting with 'Personal' (e.g., 'Assets:Personal Checking')",
+      "Matches all Liabilities accounts starting with 'Family' (e.g., 'Liabilities:Family Credit Card')",
+      "Matches all Assets accounts starting with 'Home' (e.g., 'Assets:Home Equity Line')",
+      "Matches all Liabilities accounts starting with 'Home' (e.g., 'Liabilities:Home Mortgage')",
+      "Matches all Equity accounts starting with 'Family' (e.g., 'Equity:Family Trust')",
+      "Matches all Equity accounts starting with 'Personal' (e.g., 'Equity:Personal Capital')",
+      "Matches all Assets accounts starting with 'Family' (e.g., 'Assets:Family Savings')",
+      "Matches any account with '3023 Old Hill' (personal residence)",
+      "Matches any account with '3023 Old hill' (lowercase variant)",
+      "Matches investment accounts (retirement, stocks, crypto)",
+      "Matches retirement accounts",
+      "Matches Schwab brokerage accounts",
+      "Matches crypto wallet accounts (Ledger)",
+      "Matches Coinbase cryptocurrency accounts",
+      "Matches the root Assets account",
+      "Matches the root Liabilities account",
+      "Matches the root Income account",
+      "Matches the root Expenses account",
+      "Matches the root Equity account",
+      "Matches opening balances root account",
+      "Matches owner investments equity account",
+      "Matches personal bank checking/savings accounts",
+      "Matches imbalance adjustment accounts",
+      "Matches orphan adjustment accounts",
+      "Matches accounts receivable",
+      "Matches L&N Federal Credit Union accounts",
+      "Matches Chase Amazon credit card",
+      "Matches American Express credit card",
+      "Matches Citibank Costco credit card",
+      "Matches personal credit card accounts",
+      "Matches accounts payable",
+      "Matches sales tax liability accounts",
+      "Matches Fixed Assets structural root account",
+      "Matches Current Assets structural root account",
+      "Matches Loans structural root account"
+    ]
+  }
+}

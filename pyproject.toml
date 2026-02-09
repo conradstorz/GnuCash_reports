@@ -1,0 +1,39 @@
+[project]
+name = "gcgaap"
+version = "0.2.0"
+description = "GnuCash GAAP Validation and Reporting - A Python CLI tool for validating and generating GAAP-style reports from GnuCash books"
+authors = [
+    {name = "Conrad"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "piecash>=1.2.0",  # GnuCash file access via SQLAlchemy
+    "click>=8.1.0",     # CLI framework
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+gcgaap = "gcgaap.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
