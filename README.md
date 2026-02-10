@@ -18,6 +18,7 @@ GCGAAP provides:
 - ✅ **Smart entity inference with AI pattern analysis**
 - ✅ Transaction-level validation
 - ✅ Imbalance/Orphan account detection
+- ✅ **Comprehensive violations reporting with entity-level analysis**
 - ✅ Entity scanning for unmapped accounts
 - 🚧 Balance Sheet reporting (planned)
 - 🚧 Multi-entity accounting equation validation (planned)
@@ -54,7 +55,34 @@ gcgaap entity-infer --file mybook.gnucash
 gcgaap entity-infer --file mybook.gnucash --output entity-map.json
 ```
 
-### 2. Scan for unmapped accounts
+### 2. Run violations report (recommended)
+
+```bash
+# Get comprehensive data quality report
+gcgaap violations --file mybook.gnucash --as-of 2026-12-31
+
+# The vScan for unmapped accounts
+
+```bash
+gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json
+```
+
+### 4. iolations report identifies:
+# - Imbalanced transactions (critical)
+# - Unmapped accounts (errors)
+# - Entity-level accounting equation violations (errors)
+# - Imbalance/Orphan accounts with non-zero balances (warnings)
+```
+
+The violations report provides:
+- Summary of all data quality issues by category
+- Entity balance summary showing which entities don't balance
+- Detailed violation information with context
+- Actionable recommendations for fixing issues
+
+This is the best starting point to understand what needs to be fixed in your GnuCash data.
+
+### 3. Scan for unmapped accounts
 
 ```bash
 gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json
@@ -67,7 +95,7 @@ gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json
 gcgaap validate --file mybook.gnucash --entity-map entity-map.json
 
 # Strict validation (required before generating reports)
-# Ensures 100% entity mapping - errors if any account is unmapped
+# En5ures 100% entity mapping - errors if any account is unmapped
 gcgaap validate --file mybook.gnucash --entity-map entity-map.json --strict
 ```
 
@@ -138,8 +166,10 @@ gcgaap/
 │   ├── cli.py              # CLI entrypoint and commands
 │   ├── config.py           # Configuration management
 │   ├── entity_map.py       # Entity mapping logic
+│   ├── entity_inference.py # Smart entity detection
 │   ├── gnucash_access.py   # GnuCash data access abstraction
 │   ├── validate.py         # Validation engine
+│   ├── violations.py       # Comprehensive violations reporting
 │   └── reports/
 │       ├── __init__.py
 │       └── balance_sheet.py

@@ -13,9 +13,10 @@ import click
 from . import __version__
 from .config import GCGAAPConfig, setup_logging
 from .entity_map import EntityMap
-from .gnucash_access import GnuCashBook
+from .gnucash_access import GnuCashBook, parse_date
 from .validate import validate_book, scan_unmapped_accounts
 from .entity_inference import EntityInferenceEngine
+from .violations import generate_violations_report, format_violations_report
 from .reports.balance_sheet import (
     generate_balance_sheet,
     format_as_text,
@@ -414,6 +415,116 @@ def validate(book_file, entity_map_file, tolerance, strict):
         sys.exit(1)
     except Exception as e:
         logger.error(f"Error during validation: {e}", exc_info=True)
+        sys.exit(1)
+
+
+@main.command()
+@click.option(
+    "--file",
+    "-f",
+    "book_file",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to the GnuCash book file (.gnucash)."
+)
+@click.option(
+    "--entity-map",
+    "-e",
+    "entity_map_file",
+    type=click.Path(path_type=Path),
+    default="entity-map.json",
+    help="Path to the entity mapping JSON file (default: entity-map.json)."
+)
+@click.option(
+    "--as-of",
+    type=str,
+    default=None,
+    help="Balance calculation date in YYYY-MM-DD format (default: today)."
+)
+@click.option(
+    "--tolerance",
+    "-t",
+    type=float,
+    default=0.01,
+    help="Numeric tolerance for balance checks (default: 0.01)."
+)
+def violations(book_file, entity_map_file, as_of, tolerance):
+    """
+    Generate a comprehensive data quality violations report.
+    
+    This command performs extensive validation and reports ALL data quality
+    issues including:
+    
+    \b
+    - Imbalanced transactions (critical)
+    - Unmapped accounts (errors)
+    - Entity-level accounting equation violations (errors)
+    - Imbalance/Orphan accounts with non-zero balances (warnings)
+    
+    The violations report shows:
+    \b
+    - Summary of all violations by category
+    - Entity balance summary (which entities don't balance)
+    - Detailed violation information
+    - Actionable recommendations for fixing issues
+    
+    Use this command to identify and prioritize data quality fixes before
+    generating financial reports.
+    """
+    logger.info("=== GCGAAP Violations Report ===")
+    
+    try:
+        # Create configuration
+        config = GCGAAPConfig(numeric_tolerance=tolerance)
+        
+        # Load entity map
+        entity_map = EntityMap.load(entity_map_file)
+        
+        # Parse as_of_date
+        if as_of:
+            as_of_date = parse_date(as_of)
+        else:
+            from datetime import date as date_class
+            as_of_date = date_class.today()
+        
+        click.echo(f"Analyzing book as of {as_of_date}")
+        click.echo()
+        
+        # Open book and generate violations report
+        with GnuCashBook(book_file) as book:
+            report = generate_violations_report(
+                book=book,
+                entity_map=entity_map,
+                as_of_date=as_of_date,
+                config=config
+            )
+        
+        # Format and display the report
+        formatted_report = format_violations_report(report)
+        click.echo(formatted_report)
+        
+        # Exit with appropriate code
+        if report.has_critical:
+            click.echo("\n[CRITICAL] Critical violations found - data integrity compromised!")
+            sys.exit(2)
+        elif report.has_errors:
+            click.echo("\n[FAIL] Errors found - reports cannot be generated until resolved.")
+            sys.exit(1)
+        elif report.warning_count > 0:
+            click.echo(f"\n[OK] No critical errors, but {report.warning_count} warning(s) found.")
+            sys.exit(0)
+        else:
+            click.echo("\n[OK] No violations found - data quality is excellent!")
+            sys.exit(0)
+        
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        sys.exit(1)
+    except ValueError as e:
+        logger.error(f"Invalid input: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error generating violations report: {e}", exc_info=True)
         sys.exit(1)
 
 
