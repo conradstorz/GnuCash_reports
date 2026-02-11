@@ -4,8 +4,10 @@ Command-line interface for GCGAAP.
 Provides CLI commands for validation, entity management, and reporting.
 """
 
+import json
 import logging
 import sys
+import warnings
 from pathlib import Path
 
 import click
@@ -22,6 +24,11 @@ from .reports.balance_sheet import (
     format_as_text,
     format_as_csv,
     format_as_json
+)
+from .snapshot import (
+    DatabaseSnapshot,
+    compare_snapshots,
+    format_comparison_text
 )
 
 logger = logging.getLogger(__name__)
@@ -448,6 +455,162 @@ def validate(book_file, entity_map_file, tolerance, strict, format, quiet):
         if not quiet:
             logger.error(f"Error during validation: {e}", exc_info=True)
         click.echo(f"ERROR: {e}")
+        sys.exit(1)
+
+
+@main.command()
+@click.option(
+    "--file",
+    "-f",
+    "book_file",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to the GnuCash book file (.gnucash)."
+)
+@click.option(
+    "--output",
+    "-o",
+    "output_file",
+    type=click.Path(path_type=Path),
+    required=True,
+    help="Path to save the snapshot JSON file."
+)
+def snapshot(book_file, output_file):
+    """
+    Capture a complete snapshot of the GnuCash database.
+    
+    This creates a JSON snapshot file containing all accounts and transactions
+    with their current state, including any errors. Useful for:
+    
+    \b
+    - Debugging data integrity issues
+    - Tracking changes before/after fixes
+    - Identifying what external utilities might be corrupting
+    
+    Use 'diff-snapshots' command to compare two snapshots and see what changed.
+    """
+    logger.info("=== GCGAAP Database Snapshot ===")
+    
+    try:
+        # Open book and capture snapshot
+        with GnuCashBook(book_file) as book:
+            db_snapshot = DatabaseSnapshot.capture(book)
+        
+        # Save snapshot
+        db_snapshot.save(output_file)
+        
+        click.echo(f"\nSnapshot captured successfully!")
+        click.echo(f"Timestamp: {db_snapshot.timestamp}")
+        click.echo(f"Accounts: {db_snapshot.metadata['account_count']}")
+        click.echo(f"Transactions: {db_snapshot.metadata['transaction_count']}")
+        click.echo(f"Errors: {db_snapshot.metadata['error_count']}")
+        click.echo(f"\nSaved to: {output_file}")
+        
+        sys.exit(0)
+        
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error creating snapshot: {e}", exc_info=True)
+        sys.exit(1)
+
+
+@main.command()
+@click.option(
+    "--before",
+    "-b",
+    "before_file",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to the 'before' snapshot JSON file."
+)
+@click.option(
+    "--after",
+    "-a",
+    "after_file",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to the 'after' snapshot JSON file."
+)
+@click.option(
+    "--output",
+    "-o",
+    "output_file",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Path to save comparison results (JSON). If omitted, prints to console."
+)
+@click.option(
+    "--format",
+    type=click.Choice(["text", "json"], case_sensitive=False),
+    default="text",
+    help="Output format (default: text)."
+)
+def diff_snapshots(before_file, after_file, output_file, format):
+    """
+    Compare two database snapshots to see what changed.
+    
+    This is extremely useful for debugging what fixing a transaction actually
+    changed, or identifying what an external utility is doing to the database.
+    
+    \b
+    Highlights:
+    - Transactions that were fixed (had errors before, not after)
+    - Transactions that were broken (OK before, errors after)
+    - All modifications with before/after details
+    
+    Example workflow:
+    \b
+    1. gcgaap snapshot -f book.gnucash -o before.json
+    2. (fix transaction in GnuCash or run external utility)
+    3. gcgaap snapshot -f book.gnucash -o after.json
+    4. gcgaap diff-snapshots -b before.json -a after.json
+    """
+    logger.info("=== GCGAAP Snapshot Comparison ===")
+    
+    try:
+        # Load snapshots
+        logger.info(f"Loading before snapshot from {before_file}")
+        before = DatabaseSnapshot.load(before_file)
+        
+        logger.info(f"Loading after snapshot from {after_file}")
+        after = DatabaseSnapshot.load(after_file)
+        
+        # Compare
+        changes = compare_snapshots(before, after)
+        
+        # Format output
+        if format.lower() == "json":
+            import json
+            output = json.dumps(changes, indent=2)
+        else:
+            output = format_comparison_text(changes)
+        
+        # Save or print
+        if output_file:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(output)
+            click.echo(f"Comparison saved to: {output_file}")
+        else:
+            click.echo(output)
+        
+        # Exit code based on findings
+        summary = changes["summary"]
+        if summary["transactions_fixed"] > 0:
+            click.echo(f"\n✓ {summary['transactions_fixed']} transaction(s) were successfully fixed!")
+        
+        if summary["transactions_broken"] > 0:
+            click.echo(f"\n✗ WARNING: {summary['transactions_broken']} transaction(s) were damaged!")
+            sys.exit(1)
+        
+        sys.exit(0)
+        
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error comparing snapshots: {e}", exc_info=True)
         sys.exit(1)
 
 
