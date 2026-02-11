@@ -364,7 +364,19 @@ def _merge_entity_maps(existing: EntityMap, suggested: EntityMap) -> EntityMap:
     is_flag=True,
     help="Strict mode: Require 100%% entity mapping (for pre-report validation)."
 )
-def validate(book_file, entity_map_file, tolerance, strict):
+@click.option(
+    "--format",
+    type=click.Choice(["text", "json", "csv"], case_sensitive=False),
+    default="text",
+    help="Output format (default: text)."
+)
+@click.option(
+    "--quiet",
+    "-q",
+    is_flag=True,
+    help="Suppress log messages, show only formatted output."
+)
+def validate(book_file, entity_map_file, tolerance, strict, format, quiet):
     """
     Validate the integrity of a GnuCash book.
     
@@ -372,17 +384,33 @@ def validate(book_file, entity_map_file, tolerance, strict):
     - Transaction-level double-entry balancing
     - Imbalance/Orphan account detection
     - Entity mapping coverage
+    - Data integrity issues
     
     Use --strict mode before generating reports to ensure ALL accounts
     are mapped to entities (unmapped accounts become errors instead of warnings).
     
+    Use --format json or --format csv for machine-readable output.
+    Use --quiet to suppress log messages.
+    
     Returns exit code 0 if validation passes (no errors),
     non-zero if errors are found.
     """
-    if strict:
-        logger.info("=== GCGAAP Validation (STRICT MODE) ===")
-    else:
-        logger.info("=== GCGAAP Validation ===")
+    # Suppress SQLAlchemy warnings
+    import warnings
+    warnings.filterwarnings('ignore', category=Warning)
+    
+    # Suppress all logging in quiet mode
+    if quiet:
+        import logging
+        logging.getLogger().setLevel(logging.CRITICAL)
+        logging.getLogger('gcgaap').setLevel(logging.CRITICAL)
+        logging.getLogger('piecash').setLevel(logging.CRITICAL)
+    
+    if not quiet:
+        if strict:
+            logger.info("=== GCGAAP Validation (STRICT MODE) ===")
+        else:
+            logger.info("=== GCGAAP Validation ===")
     
     try:
         # Create configuration
@@ -393,28 +421,33 @@ def validate(book_file, entity_map_file, tolerance, strict):
         
         # Open book and validate
         with GnuCashBook(book_file) as book:
-            result = validate_book(book, entity_map, config, strict_mode=strict)
+            result = validate_book(book, entity_map, config, strict_mode=strict, quiet=quiet)
         
-        # Log summary
-        click.echo()
-        result.log_summary()
+        # Format and display output
+        if format.lower() == "json":
+            output = result.format_as_json()
+        elif format.lower() == "csv":
+            output = result.format_as_csv()
+        else:  # text
+            output = result.format_as_text(strict_mode=strict)
+        
+        click.echo(output)
         
         # Exit with appropriate code
         if result.has_errors:
-            click.echo(f"\n[FAIL] Validation FAILED: {result.error_count} error(s) found.")
             sys.exit(1)
         else:
-            if result.has_warnings:
-                click.echo(f"\n[OK] Validation PASSED with {result.warning_count} warning(s).")
-            else:
-                click.echo("\n[OK] Validation PASSED with no issues.")
             sys.exit(0)
         
     except FileNotFoundError as e:
-        logger.error(f"File not found: {e}")
+        if not quiet:
+            logger.error(f"File not found: {e}")
+        click.echo(f"ERROR: File not found: {e}")
         sys.exit(1)
     except Exception as e:
-        logger.error(f"Error during validation: {e}", exc_info=True)
+        if not quiet:
+            logger.error(f"Error during validation: {e}", exc_info=True)
+        click.echo(f"ERROR: {e}")
         sys.exit(1)
 
 

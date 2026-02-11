@@ -141,13 +141,120 @@ class ValidationResult:
             logger.error(f"✗ Validation FAILED with {self.error_count} error(s)")
         else:
             logger.info(f"✓ Validation passed (with {self.warning_count} warning(s))")
+    
+    def format_as_text(self, strict_mode: bool = False) -> str:
+        """
+        Format validation results as human-readable text.
+        
+        Args:
+            strict_mode: Whether strict mode was used.
+            
+        Returns:
+            Formatted text report.
+        """
+        lines = []
+        lines.append("=" * 80)
+        lines.append("GCGAAP VALIDATION REPORT")
+        if strict_mode:
+            lines.append("Mode: STRICT (100% entity mapping required)")
+        else:
+            lines.append("Mode: STANDARD")
+        lines.append("=" * 80)
+        lines.append("")
+        
+        # Summary
+        if self.has_errors:
+            status = "[FAILED]"
+        elif self.has_warnings:
+            status = "[PASSED WITH WARNINGS]"
+        else:
+            status = "[PASSED]"
+        
+        lines.append(f"Status: {status}")
+        lines.append(f"Errors: {self.error_count}")
+        lines.append(f"Warnings: {self.warning_count}")
+        lines.append("")
+        
+        # Errors
+        if self.error_count > 0:
+            lines.append("-" * 80)
+            lines.append(f"ERRORS ({self.error_count})")
+            lines.append("-" * 80)
+            for i, problem in enumerate([p for p in self.problems if p.severity == "error"], 1):
+                lines.append(f"{i}. {problem.message}")
+                if problem.context:
+                    lines.append(f"   Context: {problem.context}")
+                lines.append("")
+        
+        # Warnings
+        if self.warning_count > 0:
+            lines.append("-" * 80)
+            lines.append(f"WARNINGS ({self.warning_count})")
+            lines.append("-" * 80)
+            for i, problem in enumerate([p for p in self.problems if p.severity == "warning"], 1):
+                lines.append(f"{i}. {problem.message}")
+                if problem.context:
+                    lines.append(f"   Context: {problem.context}")
+                lines.append("")
+        
+        lines.append("=" * 80)
+        
+        return "\n".join(lines)
+    
+    def format_as_json(self) -> str:
+        """
+        Format validation results as JSON.
+        
+        Returns:
+            JSON string with validation results.
+        """
+        import json
+        
+        data = {
+            "status": "failed" if self.has_errors else ("warning" if self.has_warnings else "passed"),
+            "error_count": self.error_count,
+            "warning_count": self.warning_count,
+            "problems": [
+                {
+                    "severity": p.severity,
+                    "message": p.message,
+                    "context": p.context
+                }
+                for p in self.problems
+            ]
+        }
+        
+        return json.dumps(data, indent=2)
+    
+    def format_as_csv(self) -> str:
+        """
+        Format validation results as CSV.
+        
+        Returns:
+            CSV string with validation results.
+        """
+        import csv
+        from io import StringIO
+        
+        output = StringIO()
+        writer = csv.writer(output)
+        
+        # Header
+        writer.writerow(["Severity", "Message", "Context"])
+        
+        # Data
+        for problem in self.problems:
+            writer.writerow([problem.severity, problem.message, problem.context or ""])
+        
+        return output.getvalue()
 
 
 def validate_book(
     book: GnuCashBook,
     entity_map: EntityMap,
     config: Optional[GCGAAPConfig] = None,
-    strict_mode: bool = False
+    strict_mode: bool = False,
+    quiet: bool = False
 ) -> ValidationResult:
     """
     Perform comprehensive validation of a GnuCash book.
@@ -158,7 +265,7 @@ def validate_book(
         config: Optional configuration; uses default if not provided.
         strict_mode: If True, require 100% entity mapping coverage (errors instead
                     of warnings). Use strict_mode=True before generating reports.
-        config: Optional configuration; uses default if not provided.
+        quiet: If True, suppress log messages.
         
     Returns:
         ValidationResult with all problems found.
@@ -167,20 +274,22 @@ def validate_book(
         from .config import default_config
         config = default_config
     
-    if strict_mode:
-        logger.info("Starting book validation (STRICT MODE - required for reporting)")
-    else:
-        logger.info("Starting book validation")
+    if not quiet:
+        if strict_mode:
+            logger.info("Starting book validation (STRICT MODE - required for reporting)")
+        else:
+            logger.info("Starting book validation")
     
     result = ValidationResult()
     
     # Validate accounts
-    validate_accounts(book, entity_map, result, strict_mode=strict_mode)
+    validate_accounts(book, entity_map, result, strict_mode=strict_mode, quiet=quiet)
     
     # Validate transactions
-    validate_transactions(book, config, result)
+    validate_transactions(book, config, result, quiet=quiet)
     
-    logger.info("Validation complete")
+    if not quiet:
+        logger.info("Validation complete")
     
     return result
 
@@ -189,7 +298,8 @@ def validate_accounts(
     book: GnuCashBook,
     entity_map: EntityMap,
     result: ValidationResult,
-    strict_mode: bool = False
+    strict_mode: bool = False,
+    quiet: bool = False
 ) -> None:
     """
     Validate account-level issues.
@@ -204,8 +314,10 @@ def validate_accounts(
         result: ValidationResult to append problems to.
         strict_mode: If True, treat unmapped accounts as errors instead of warnings.
                     This ensures 100% coverage required for GAAP reporting.
+        quiet: If True, suppress log messages.
     """
-    logger.debug("Validating accounts")
+    if not quiet:
+        logger.debug("Validating accounts")
     
     unmapped_count = 0
     imbalance_accounts = []
@@ -230,7 +342,8 @@ def validate_accounts(
         if account.is_imbalance_account():
             imbalance_accounts.append(account.full_name)
     
-    logger.info(f"Processed {total_accounts} accounts")
+    if not quiet:
+        logger.info(f"Processed {total_accounts} accounts")
     
     # Report unmapped accounts
     if unmapped_count > 0:
@@ -241,9 +354,10 @@ def validate_accounts(
                 f"All accounts MUST be mapped to entities before generating reports. "
                 f"Use 'entity-scan' or 'entity-infer' commands to identify and map them."
             )
-            logger.error(
-                f"STRICT MODE: {unmapped_count} unmapped accounts block report generation"
-            )
+            if not quiet:
+                logger.error(
+                    f"STRICT MODE: {unmapped_count} unmapped accounts block report generation"
+                )
         else:
             # In normal mode, unmapped accounts are warnings
             result.add_warning(
@@ -251,10 +365,11 @@ def validate_accounts(
                 f"Use 'entity-scan' command to identify them."
             )
     else:
-        logger.info("✓ All accounts have entity mappings")
+        if not quiet:
+            logger.info("✓ All accounts have entity mappings")
     
     # Log entity distribution
-    if entity_counts:
+    if entity_counts and not quiet:
         logger.info("Account distribution by entity:")
         for entity_key, count in sorted(entity_counts.items()):
             entity_label = entity_map.entities.get(entity_key, None)
@@ -274,42 +389,80 @@ def validate_accounts(
 def validate_transactions(
     book: GnuCashBook,
     config: GCGAAPConfig,
-    result: ValidationResult
+    result: ValidationResult,
+    quiet: bool = False
 ) -> None:
     """
     Validate transaction-level balancing.
     
     Checks that all transactions balance (sum of splits ≈ 0).
+    Also detects data integrity issues (invalid dates, corrupted records).
     
     Args:
         book: Opened GnuCashBook.
         config: Configuration with numeric tolerance.
         result: ValidationResult to append problems to.
+        quiet: If True, suppress log messages.
     """
-    logger.debug("Validating transactions")
+    if not quiet:
+        logger.debug("Validating transactions")
     
     unbalanced_count = 0
     total_transactions = 0
+    data_integrity_errors = 0
     
-    for transaction in book.iter_transactions():
-        total_transactions += 1
-        
-        if not transaction.is_balanced(config.numeric_tolerance):
-            unbalanced_count += 1
-            total = transaction.total_value()
+    # Try to iterate through transactions, catching data integrity issues
+    try:
+        for transaction in book.iter_transactions():
+            total_transactions += 1
             
+            if not transaction.is_balanced(config.numeric_tolerance):
+                unbalanced_count += 1
+                total = transaction.total_value()
+                
+                result.add_error(
+                    f"Unbalanced transaction: '{transaction.description}' "
+                    f"(imbalance: {total:.4f})",
+                    context=f"GUID: {transaction.guid}, Date: {transaction.post_date}"
+                )
+    except ValueError as e:
+        # Catch datetime parsing errors and other value errors
+        error_msg = str(e)
+        data_integrity_errors += 1
+        
+        if "datetime" in error_msg.lower() or "date" in error_msg.lower():
             result.add_error(
-                f"Unbalanced transaction: '{transaction.description}' "
-                f"(imbalance: {total:.4f})",
-                context=f"GUID: {transaction.guid}, Date: {transaction.post_date}"
+                "Transaction with invalid or missing date",
+                context=error_msg
             )
+        else:
+            result.add_error(
+                f"Data integrity error: {error_msg}",
+                context="Transaction data is corrupted or invalid"
+            )
+        
+        if not quiet:
+            logger.error(f"Data integrity error encountered: {error_msg}")
+    except Exception as e:
+        # Catch any other unexpected errors
+        data_integrity_errors += 1
+        result.add_error(
+            f"Unexpected error during transaction validation: {type(e).__name__}",
+            context=str(e)
+        )
+        if not quiet:
+            logger.error(f"Unexpected error: {e}", exc_info=True)
     
-    logger.info(f"Processed {total_transactions} transactions")
+    if not quiet:
+        logger.info(f"Processed {total_transactions} transactions")
     
-    if unbalanced_count == 0:
-        logger.info("✓ All transactions are balanced (within tolerance)")
-    else:
-        logger.error(f"✗ Found {unbalanced_count} unbalanced transaction(s)")
+        if data_integrity_errors > 0:
+            logger.error(f"✗ Found {data_integrity_errors} data integrity error(s) - fix these in GnuCash")
+    
+        if unbalanced_count == 0 and data_integrity_errors == 0:
+            logger.info("✓ All transactions are balanced (within tolerance)")
+        elif unbalanced_count > 0:
+            logger.error(f"✗ Found {unbalanced_count} unbalanced transaction(s)")
 
 
 def scan_unmapped_accounts(
