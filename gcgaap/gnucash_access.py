@@ -228,36 +228,124 @@ class GnuCashBook:
         
         Yields:
             GCTransaction instances for each transaction in the book.
+            Skips transactions with data integrity issues (logged as errors).
             
         Raises:
             RuntimeError: If called outside of context manager.
+            ValueError: If a transaction has critical data corruption that prevents iteration.
         """
         if self._book is None:
             raise RuntimeError("Book not opened. Use within 'with' statement.")
         
         logger.debug("Iterating over transactions")
         
+        transaction_count = 0
+        error_transactions = []  # Collect all error details
+        
         for transaction in self._book.transactions:
-            # Convert splits
-            splits = []
-            for split in transaction.splits:
-                # Convert Decimal to float for simplicity
-                value = float(split.value) if isinstance(split.value, Decimal) else split.value
-                quantity = float(split.quantity) if isinstance(split.quantity, Decimal) else split.quantity
+            try:
+                # Try to access basic transaction properties first
+                trans_guid = str(transaction.guid)
+                trans_desc = transaction.description if transaction.description else "(No description)"
                 
-                splits.append(GCTransactionSplit(
-                    account_guid=str(split.account.guid),
-                    value=value,
-                    quantity=quantity,
-                    memo=split.memo if split.memo else None
-                ))
-            
-            yield GCTransaction(
-                guid=str(transaction.guid),
-                post_date=transaction.post_date.strftime("%Y-%m-%d"),
-                description=transaction.description if transaction.description else "",
-                splits=splits
+                # Try to get account names from splits BEFORE trying to parse date
+                # (the error might happen when accessing splits due to datetime issues)
+                account_info = []
+                split_count = 0
+                try:
+                    for split in transaction.splits:
+                        split_count += 1
+                        try:
+                            account_name = split.account.name if split.account else "Unknown"
+                            account_info.append(account_name)
+                        except Exception:
+                            account_info.append("(Error reading account)")
+                except Exception as split_error:
+                    # Error accessing splits - collect details and continue
+                    accounts_str = ", ".join(account_info) if account_info else "(Unable to read splits)"
+                    
+                    error_details = (
+                        f"GUID: {trans_guid}\n"
+                        f"    Description: {trans_desc}\n"
+                        f"    Accounts: {accounts_str}\n"
+                        f"    Split Count: {split_count}\n"
+                        f"    Error: {str(split_error)}"
+                    )
+                    
+                    logger.error(f"Transaction has data integrity error:\n{error_details}")
+                    error_transactions.append(error_details)
+                    continue  # Skip this transaction and continue with next
+                
+                # Try to access post_date - this is where datetime errors occur
+                try:
+                    post_date_str = transaction.post_date.strftime("%Y-%m-%d")
+                except (ValueError, AttributeError, TypeError) as e:
+                    # Invalid or missing date - collect details and continue
+                    
+                    accounts_str = ", ".join(account_info[:3]) if account_info else "Unable to read accounts"
+                    if len(account_info) > 3:
+                        accounts_str += f" (and {len(account_info) - 3} more)"
+                    
+                    error_details = (
+                        f"GUID: {trans_guid}\n"
+                        f"    Description: {trans_desc}\n"
+                        f"    Accounts: {accounts_str}\n"
+                        f"    Error: {str(e)}"
+                    )
+                    
+                    logger.error(f"Transaction has invalid date:\n{error_details}")
+                    error_transactions.append(error_details)
+                    continue  # Skip this transaction and continue with next
+                
+                # Convert splits - this can also fail with datetime errors
+                splits = []
+                for split in transaction.splits:
+                    # Convert Decimal to float for simplicity
+                    value = float(split.value) if isinstance(split.value, Decimal) else split.value
+                    quantity = float(split.quantity) if isinstance(split.quantity, Decimal) else split.quantity
+                    
+                    splits.append(GCTransactionSplit(
+                        account_guid=str(split.account.guid),
+                        value=value,
+                        quantity=quantity,
+                        memo=split.memo if split.memo else None
+                    ))
+                
+                transaction_count += 1
+                yield GCTransaction(
+                    guid=trans_guid,
+                    post_date=post_date_str,
+                    description=trans_desc,
+                    splits=splits
+                )
+                
+            except ValueError:
+                # Should not happen anymore since we're catching and continuing
+                raise
+            except Exception as e:
+                # Log other unexpected errors
+                logger.error(f"Unexpected error processing transaction: {e}", exc_info=True)
+                # Try to collect details if possible
+                try:
+                    error_details = (
+                        f"GUID: {trans_guid}\n"
+                        f"    Description: {trans_desc}\n"
+                        f"    Error: {str(e)}"
+                    )
+                    error_transactions.append(error_details)
+                except:
+                    error_transactions.append(f"Unknown transaction error: {str(e)}")
+                continue
+        
+        # After processing all transactions, report errors if any
+        if error_transactions:
+            error_summary = "\n\n".join([f"Transaction {i+1}:\n{details}" for i, details in enumerate(error_transactions)])
+            logger.error(f"Found {len(error_transactions)} transaction(s) with data integrity issues")
+            raise ValueError(
+                f"Found {len(error_transactions)} transaction(s) with data integrity errors:\n\n{error_summary}"
             )
+        
+        logger.debug(f"Successfully iterated {transaction_count} transactions")
     
     def get_account_by_guid(self, guid: str) -> Optional[GCAccount]:
         """
