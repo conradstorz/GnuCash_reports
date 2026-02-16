@@ -40,10 +40,19 @@ htmlcov/
 
 # Project specific
 entity-map-*.json
-!entity-map-suggested.json
 *.gnucash
 *.gnucash.lock
 *.log
 *.tmp
 *.bak
 .cache/
+
+# Operational data (contains private database information)
+snapshot_*.json
+validation_report.*
+diff_results.json
+
+# Deprecated diagnostic scripts
+detailed_diagnose.py
+diagnose_corrupt_transactions.py
+fix_reconcile_dates.py
