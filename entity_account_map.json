@@ -1,0 +1,1228 @@
+{
+  "summary": {
+    "total_accounts": 171,
+    "entity_counts": {
+      "unassigned": 15,
+      "personal": 56,
+      "storz_amusements": 36,
+      "storz_cash": 43,
+      "storz_property": 21
+    },
+    "entity_labels": {
+      "unassigned": "Unassigned",
+      "personal": "Personal",
+      "storz_amusements": "Storz Amusements",
+      "storz_cash": "Storz Cash",
+      "storz_property": "Storz Property"
+    }
+  },
+  "entities": {
+    "unassigned": [
+      {
+        "guid": "6f5c9f3b335d416b8e3a934e3d5eed46",
+        "name": "All Bank Checking and Savings Accounts",
+        "full_name": "All Bank Checking and Savings Accounts",
+        "type": "BANK",
+        "parent_guid": null
+      },
+      {
+        "guid": "66a314373a7644dab71ce8651ccfaf84",
+        "name": "Assets root",
+        "full_name": "Assets root",
+        "type": "ASSET",
+        "parent_guid": null
+      },
+      {
+        "guid": "ceb700ee369e441c8267a6f7b3912f51",
+        "name": "Current Assets root",
+        "full_name": "Assets root:Current Assets root",
+        "type": "ASSET",
+        "parent_guid": "66a314373a7644dab71ce8651ccfaf84"
+      },
+      {
+        "guid": "f8a026291f7f4f21b66921295eb91c2c",
+        "name": "Fixed Assets root",
+        "full_name": "Assets root:Fixed Assets root",
+        "type": "ASSET",
+        "parent_guid": "66a314373a7644dab71ce8651ccfaf84"
+      },
+      {
+        "guid": "86da0cb0a9a2463b99d3d24c9ab405e0",
+        "name": "Equity root",
+        "full_name": "Equity root",
+        "type": "EQUITY",
+        "parent_guid": null
+      },
+      {
+        "guid": "6e34f1d4e25f491dbd4fb2a5fcebe6b7",
+        "name": "Opening Balances root",
+        "full_name": "Equity root:Opening Balances root",
+        "type": "EQUITY",
+        "parent_guid": "86da0cb0a9a2463b99d3d24c9ab405e0"
+      },
+      {
+        "guid": "6b7f7b71f0a748bcb963f3d3e56df580",
+        "name": "Expenses root",
+        "full_name": "Expenses root",
+        "type": "EXPENSE",
+        "parent_guid": null
+      },
+      {
+        "guid": "5fe1f03f27f64db7b0005ec08cbedf4e",
+        "name": "Imbalance-USD",
+        "full_name": "Imbalance-USD",
+        "type": "BANK",
+        "parent_guid": null
+      },
+      {
+        "guid": "f045f3dc7b5d4c74b341681185ab0186",
+        "name": "Income root",
+        "full_name": "Income root",
+        "type": "INCOME",
+        "parent_guid": null
+      },
+      {
+        "guid": "171683286aa948288674572890c30765",
+        "name": "Liabilities root",
+        "full_name": "Liabilities root",
+        "type": "LIABILITY",
+        "parent_guid": null
+      },
+      {
+        "guid": "3996061b944741aca6f2d513f495690a",
+        "name": "Accounts Payable",
+        "full_name": "Liabilities root:Accounts Payable",
+        "type": "PAYABLE",
+        "parent_guid": "171683286aa948288674572890c30765"
+      },
+      {
+        "guid": "626e5c2b1cc446aaae2341f230e1d66d",
+        "name": "Loans",
+        "full_name": "Liabilities root:Loans",
+        "type": "LIABILITY",
+        "parent_guid": "171683286aa948288674572890c30765"
+      },
+      {
+        "guid": "b19eef719cf94f1e852ca0fcb7de63e0",
+        "name": "Sales Tax",
+        "full_name": "Liabilities root:Sales Tax",
+        "type": "LIABILITY",
+        "parent_guid": "171683286aa948288674572890c30765"
+      },
+      {
+        "guid": "ab5a69e3b8a449bc9c7e2f17891679b1",
+        "name": "Orphan-USD",
+        "full_name": "Orphan-USD",
+        "type": "BANK",
+        "parent_guid": null
+      },
+      {
+        "guid": "8f39c518dd514e728fa99d1e37e46607",
+        "name": "Receivables",
+        "full_name": "Receivables",
+        "type": "RECEIVABLE",
+        "parent_guid": null
+      }
+    ],
+    "personal": [
+      {
+        "guid": "5df8a748a9df4fa090fdb29bcf7ef307",
+        "name": "3023 Old Hill Rd",
+        "full_name": "All Bank Checking and Savings Accounts:3023 Old Hill Rd",
+        "type": "BANK",
+        "parent_guid": "6f5c9f3b335d416b8e3a934e3d5eed46"
+      },
+      {
+        "guid": "f01147542c584bbfb7ae1d45b9153666",
+        "name": "L&N FCU Money Market",
+        "full_name": "All Bank Checking and Savings Accounts:3023 Old Hill Rd:L&N FCU Money Market",
+        "type": "BANK",
+        "parent_guid": "5df8a748a9df4fa090fdb29bcf7ef307"
+      },
+      {
+        "guid": "1e67d4ebeb5f4914993b1aa6c3c46d7c",
+        "name": "L&N Impound for roof repair",
+        "full_name": "All Bank Checking and Savings Accounts:3023 Old Hill Rd:L&N Impound for roof repair",
+        "type": "BANK",
+        "parent_guid": "5df8a748a9df4fa090fdb29bcf7ef307"
+      },
+      {
+        "guid": "70c10461ce1e44b8bf483565e8c3b5e3",
+        "name": "L&N Memeber Share Savings",
+        "full_name": "All Bank Checking and Savings Accounts:3023 Old Hill Rd:L&N Memeber Share Savings",
+        "type": "BANK",
+        "parent_guid": "5df8a748a9df4fa090fdb29bcf7ef307"
+      },
+      {
+        "guid": "bb4964e846b84cb0aae00bf64b911d73",
+        "name": "Schwab Checking for Conrad",
+        "full_name": "All Bank Checking and Savings Accounts:3023 Old Hill Rd:Schwab Checking for Conrad",
+        "type": "BANK",
+        "parent_guid": "5df8a748a9df4fa090fdb29bcf7ef307"
+      },
+      {
+        "guid": "c8b93942e56f44a3ba0b8a3d08a47bc1",
+        "name": "3023 Old hill Rd. Personal Investments root",
+        "full_name": "Assets root:3023 Old hill Rd. Personal Investments root",
+        "type": "ASSET",
+        "parent_guid": "66a314373a7644dab71ce8651ccfaf84"
+      },
+      {
+        "guid": "c379aad7d7e34f969a5277a001deccca",
+        "name": "Coinbase Account",
+        "full_name": "Assets root:3023 Old hill Rd. Personal Investments root:Coinbase Account",
+        "type": "ASSET",
+        "parent_guid": "c8b93942e56f44a3ba0b8a3d08a47bc1"
+      },
+      {
+        "guid": "76ee4c2f8a7749aa903932e1f43eceed",
+        "name": "LEDGER WALLET",
+        "full_name": "Assets root:3023 Old hill Rd. Personal Investments root:LEDGER WALLET",
+        "type": "ASSET",
+        "parent_guid": "c8b93942e56f44a3ba0b8a3d08a47bc1"
+      },
+      {
+        "guid": "93b7dd89d90b4f6e89a52be35a8c528f",
+        "name": "Retirement",
+        "full_name": "Assets root:3023 Old hill Rd. Personal Investments root:Retirement",
+        "type": "ASSET",
+        "parent_guid": "c8b93942e56f44a3ba0b8a3d08a47bc1"
+      },
+      {
+        "guid": "709d8d826b514cf7aed4241e9ac96a7a",
+        "name": "Schwab AI Automated Investing Account",
+        "full_name": "Assets root:3023 Old hill Rd. Personal Investments root:Retirement:Schwab AI Automated Investing Account",
+        "type": "ASSET",
+        "parent_guid": "93b7dd89d90b4f6e89a52be35a8c528f"
+      },
+      {
+        "guid": "d3b9edbb8edd4a9ea409b8f4e6a3f422",
+        "name": "Schwab Personal Investing Acct",
+        "full_name": "Assets root:3023 Old hill Rd. Personal Investments root:Retirement:Schwab Personal Investing Acct",
+        "type": "ASSET",
+        "parent_guid": "93b7dd89d90b4f6e89a52be35a8c528f"
+      },
+      {
+        "guid": "e203c91f2de9480a868bf3ae39a07ff2",
+        "name": "Schwab ROTH-IRA account (Conrad)",
+        "full_name": "Assets root:3023 Old hill Rd. Personal Investments root:Retirement:Schwab ROTH-IRA account (Conrad)",
+        "type": "ASSET",
+        "parent_guid": "93b7dd89d90b4f6e89a52be35a8c528f"
+      },
+      {
+        "guid": "35f3efce78c342fb82f5165393cc48f1",
+        "name": "3023 Old Hill Rd",
+        "full_name": "Assets root:Current Assets root:3023 Old Hill Rd",
+        "type": "ASSET",
+        "parent_guid": "ceb700ee369e441c8267a6f7b3912f51"
+      },
+      {
+        "guid": "92cd068858a64634b5750a285dacd6d2",
+        "name": "3023 Old hill Rd",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd",
+        "type": "ASSET",
+        "parent_guid": "f8a026291f7f4f21b66921295eb91c2c"
+      },
+      {
+        "guid": "7b2652af9d434b33b9982df5df6acea9",
+        "name": "3023 Appliances",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Appliances",
+        "type": "ASSET",
+        "parent_guid": "92cd068858a64634b5750a285dacd6d2"
+      },
+      {
+        "guid": "171cca77391e4395bf22aea4f6fe0973",
+        "name": "3023 Furniture",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Furniture",
+        "type": "ASSET",
+        "parent_guid": "92cd068858a64634b5750a285dacd6d2"
+      },
+      {
+        "guid": "da77c70aa35740a4aab3e4ecb2d0e43b",
+        "name": "3023 Old Hill Road Market Value",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Old Hill Road Market Value",
+        "type": "ASSET",
+        "parent_guid": "92cd068858a64634b5750a285dacd6d2"
+      },
+      {
+        "guid": "d680fe82464d4b28aaaa52d205a21845",
+        "name": "3023 Vehicles",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Vehicles",
+        "type": "ASSET",
+        "parent_guid": "92cd068858a64634b5750a285dacd6d2"
+      },
+      {
+        "guid": "a8d59cf2a77143b3b6eebf1d480856e0",
+        "name": "2006 Pontiac Solstice",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Vehicles:2006 Pontiac Solstice",
+        "type": "ASSET",
+        "parent_guid": "d680fe82464d4b28aaaa52d205a21845"
+      },
+      {
+        "guid": "c5b9439d00534712809cce5510c9dca8",
+        "name": "2009 Kawasaki Vulcan 900 Classic",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Vehicles:2009 Kawasaki Vulcan 900 Classic",
+        "type": "ASSET",
+        "parent_guid": "d680fe82464d4b28aaaa52d205a21845"
+      },
+      {
+        "guid": "63b4696876f6453e811284fee4d1ad34",
+        "name": "2015 Buick Encore",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Vehicles:2015 Buick Encore",
+        "type": "ASSET",
+        "parent_guid": "d680fe82464d4b28aaaa52d205a21845"
+      },
+      {
+        "guid": "80901ba9e1974b68a640d979c9651c4b",
+        "name": "2019 Chevy Equinox",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Vehicles:2019 Chevy Equinox",
+        "type": "ASSET",
+        "parent_guid": "d680fe82464d4b28aaaa52d205a21845"
+      },
+      {
+        "guid": "f9b7c1dae938474f8f58733890e92f71",
+        "name": "Cub Cadet Riding Mower",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Vehicles:Cub Cadet Riding Mower",
+        "type": "ASSET",
+        "parent_guid": "d680fe82464d4b28aaaa52d205a21845"
+      },
+      {
+        "guid": "685a7cef0ae84b4e870525a97f643baf",
+        "name": "Rural King Compact Tractor",
+        "full_name": "Assets root:Fixed Assets root:3023 Old hill Rd:3023 Vehicles:Rural King Compact Tractor",
+        "type": "ASSET",
+        "parent_guid": "d680fe82464d4b28aaaa52d205a21845"
+      },
+      {
+        "guid": "b44c8a7056e0406eb013e1c59b529ea5",
+        "name": "3023 Old hill Rd. Owners Investments",
+        "full_name": "Equity root:3023 Old hill Rd. Owners Investments",
+        "type": "EQUITY",
+        "parent_guid": "86da0cb0a9a2463b99d3d24c9ab405e0"
+      },
+      {
+        "guid": "1cb456da520d4309a6674526e6db4c61",
+        "name": "Input from Conrad Storz",
+        "full_name": "Equity root:3023 Old hill Rd. Owners Investments:Input from Conrad Storz",
+        "type": "EQUITY",
+        "parent_guid": "b44c8a7056e0406eb013e1c59b529ea5"
+      },
+      {
+        "guid": "60194ab7dc9a47039879f1a137817df4",
+        "name": "Input from Michelle Knight",
+        "full_name": "Equity root:3023 Old hill Rd. Owners Investments:Input from Michelle Knight",
+        "type": "EQUITY",
+        "parent_guid": "b44c8a7056e0406eb013e1c59b529ea5"
+      },
+      {
+        "guid": "dfbc926856aa443fab1e1197927da9b2",
+        "name": "OB 3023 Old Hill Road",
+        "full_name": "Equity root:Opening Balances root:OB 3023 Old Hill Road",
+        "type": "EQUITY",
+        "parent_guid": "6e34f1d4e25f491dbd4fb2a5fcebe6b7"
+      },
+      {
+        "guid": "3ebfa4f030354da8876a2338efa9288c",
+        "name": "3023 Old Hill Rd",
+        "full_name": "Expenses root:3023 Old Hill Rd",
+        "type": "EXPENSE",
+        "parent_guid": "6b7f7b71f0a748bcb963f3d3e56df580"
+      },
+      {
+        "guid": "51c0a21ae7474f94b3d9d20e2691cd9a",
+        "name": "3023 Home Insurance",
+        "full_name": "Expenses root:3023 Old Hill Rd:3023 Home Insurance",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "627a0da72b554bbc952d88dd295a2e95",
+        "name": "3023 Home Repair",
+        "full_name": "Expenses root:3023 Old Hill Rd:3023 Home Repair",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "49f0709e1626481a8f99a3282efff871",
+        "name": "3023 Mortgage Interest",
+        "full_name": "Expenses root:3023 Old Hill Rd:3023 Mortgage Interest",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "70ad3a35af514157b84038116f48b4ec",
+        "name": "3023 upkeep of Bushmans Lake Property",
+        "full_name": "Expenses root:3023 Old Hill Rd:3023 upkeep of Bushmans Lake Property",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "5ad7227131c848439ce7bf63cccb5b21",
+        "name": "Charitable Contributions",
+        "full_name": "Expenses root:3023 Old Hill Rd:Charitable Contributions",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "7c27dd19f3204f49914450bd7ac348d5",
+        "name": "Entertainment",
+        "full_name": "Expenses root:3023 Old Hill Rd:Entertainment",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "f39eedb2cef243e8930d5b63b3c49d08",
+        "name": "Food and Groceries",
+        "full_name": "Expenses root:3023 Old Hill Rd:Food and Groceries",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "12fbe6eb23b641b2972630bc5cbf79ca",
+        "name": "Gifts to Family",
+        "full_name": "Expenses root:3023 Old Hill Rd:Gifts to Family",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "fce159297c7b41fcae919034266ae2cc",
+        "name": "Health and wellness",
+        "full_name": "Expenses root:3023 Old Hill Rd:Health and wellness",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "849fc49652d24ea887dd25c57e0d9938",
+        "name": "Household Goods",
+        "full_name": "Expenses root:3023 Old Hill Rd:Household Goods",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "56097813d1c246f285453e7d4b966756",
+        "name": "Interest Paid",
+        "full_name": "Expenses root:3023 Old Hill Rd:Interest Paid",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "8924f228d12c4d4f9ea5322ebb103df3",
+        "name": "Professional Fees",
+        "full_name": "Expenses root:3023 Old Hill Rd:Professional Fees",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "f2cb866b555541a4931cee5cbfb962e6",
+        "name": "Scotland Trip 2024",
+        "full_name": "Expenses root:3023 Old Hill Rd:Scotland Trip 2024",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "e28348c885ab4c788b2ac2c3b1725ff4",
+        "name": "Taxes and Licenses",
+        "full_name": "Expenses root:3023 Old Hill Rd:Taxes and Licenses",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "464a3955f39b47538be3a730a00dee98",
+        "name": "Travel to Wizard of OZ",
+        "full_name": "Expenses root:3023 Old Hill Rd:Travel to Wizard of OZ",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "3fd492d92c494b13af6c0c0ef79dfb3b",
+        "name": "Utilities and Propane",
+        "full_name": "Expenses root:3023 Old Hill Rd:Utilities and Propane",
+        "type": "EXPENSE",
+        "parent_guid": "3ebfa4f030354da8876a2338efa9288c"
+      },
+      {
+        "guid": "b9a4974de8b54e8185b6953b8c06ad4f",
+        "name": "3023 Old Hill Rd",
+        "full_name": "Income root:3023 Old Hill Rd",
+        "type": "INCOME",
+        "parent_guid": "f045f3dc7b5d4c74b341681185ab0186"
+      },
+      {
+        "guid": "1d061c86d9014df0ac6bee357a111c6c",
+        "name": "Casualty Insurance Income",
+        "full_name": "Income root:3023 Old Hill Rd:Casualty Insurance Income",
+        "type": "INCOME",
+        "parent_guid": "b9a4974de8b54e8185b6953b8c06ad4f"
+      },
+      {
+        "guid": "7c7b4163cb1449dd9405a0fe6ed405f2",
+        "name": "Money Market Interest",
+        "full_name": "Income root:3023 Old Hill Rd:Money Market Interest",
+        "type": "INCOME",
+        "parent_guid": "b9a4974de8b54e8185b6953b8c06ad4f"
+      },
+      {
+        "guid": "517c833c323f408fb35e8f4f8603f5b6",
+        "name": "Schawab ATM fee rebates",
+        "full_name": "Income root:3023 Old Hill Rd:Schawab ATM fee rebates",
+        "type": "INCOME",
+        "parent_guid": "b9a4974de8b54e8185b6953b8c06ad4f"
+      },
+      {
+        "guid": "2a551e5c3ea744b4a2827b23a6bf3789",
+        "name": "Yard Sale type income",
+        "full_name": "Income root:3023 Old Hill Rd:Yard Sale type income",
+        "type": "INCOME",
+        "parent_guid": "b9a4974de8b54e8185b6953b8c06ad4f"
+      },
+      {
+        "guid": "0431a435ff104376bd3de4ce652dd99f",
+        "name": "3023 Old Hill Rd. Credit Cards",
+        "full_name": "Liabilities root:3023 Old Hill Rd. Credit Cards",
+        "type": "LIABILITY",
+        "parent_guid": "171683286aa948288674572890c30765"
+      },
+      {
+        "guid": "0b0970a26104499dbcf9c1bac6619de2",
+        "name": "American Express Card",
+        "full_name": "Liabilities root:3023 Old Hill Rd. Credit Cards:American Express Card",
+        "type": "LIABILITY",
+        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
+      },
+      {
+        "guid": "5aa4d661ebfb487abf53d998f470cc7e",
+        "name": "Chase Amazon card",
+        "full_name": "Liabilities root:3023 Old Hill Rd. Credit Cards:Chase Amazon card",
+        "type": "LIABILITY",
+        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
+      },
+      {
+        "guid": "9038eac6a9dc40958c7d804759bbd542",
+        "name": "Citibank Costco card",
+        "full_name": "Liabilities root:3023 Old Hill Rd. Credit Cards:Citibank Costco card",
+        "type": "LIABILITY",
+        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
+      },
+      {
+        "guid": "815ca6b95bb3447bbcb68c65b53aedb7",
+        "name": "3023 Old Hill Rd",
+        "full_name": "Liabilities root:Loans:3023 Old Hill Rd",
+        "type": "LIABILITY",
+        "parent_guid": "626e5c2b1cc446aaae2341f230e1d66d"
+      },
+      {
+        "guid": "c624e86837664aa19925dceb580cc814",
+        "name": "3023 Old Hill Road Mortgage",
+        "full_name": "Liabilities root:Loans:3023 Old Hill Rd:3023 Old Hill Road Mortgage",
+        "type": "LIABILITY",
+        "parent_guid": "815ca6b95bb3447bbcb68c65b53aedb7"
+      }
+    ],
+    "storz_amusements": [
+      {
+        "guid": "c78db52dd3fc4d699fff2ff8c2d42979",
+        "name": "Storz Amusements LLC",
+        "full_name": "All Bank Checking and Savings Accounts:Storz Amusements LLC",
+        "type": "BANK",
+        "parent_guid": "6f5c9f3b335d416b8e3a934e3d5eed46"
+      },
+      {
+        "guid": "36d574c24fee43629377abb2c8024b35",
+        "name": "SAM Business Checking *1301",
+        "full_name": "All Bank Checking and Savings Accounts:Storz Amusements LLC:SAM Business Checking *1301",
+        "type": "BANK",
+        "parent_guid": "c78db52dd3fc4d699fff2ff8c2d42979"
+      },
+      {
+        "guid": "2f4a0a58900f4d478ea9c341c476583b",
+        "name": "SAMUSE Savings Account",
+        "full_name": "All Bank Checking and Savings Accounts:Storz Amusements LLC:SAMUSE Savings Account",
+        "type": "BANK",
+        "parent_guid": "c78db52dd3fc4d699fff2ff8c2d42979"
+      },
+      {
+        "guid": "0ff40971236b4175b36a1d6110879b07",
+        "name": "Storz Amusements LLC",
+        "full_name": "Assets root:Current Assets root:Storz Amusements LLC",
+        "type": "ASSET",
+        "parent_guid": "ceb700ee369e441c8267a6f7b3912f51"
+      },
+      {
+        "guid": "b8814f7c1245497e8a7d063b9e1ab097",
+        "name": "SAMUSE Operating Cash",
+        "full_name": "Assets root:Current Assets root:Storz Amusements LLC:SAMUSE Operating Cash",
+        "type": "ASSET",
+        "parent_guid": "0ff40971236b4175b36a1d6110879b07"
+      },
+      {
+        "guid": "0f8d7a8c30544ff395ab96a3a93bba52",
+        "name": "SAM Cash-on-hand",
+        "full_name": "Assets root:Current Assets root:Storz Amusements LLC:SAMUSE Operating Cash:SAM Cash-on-hand",
+        "type": "ASSET",
+        "parent_guid": "b8814f7c1245497e8a7d063b9e1ab097"
+      },
+      {
+        "guid": "e0f84834abaf4269bd8f42fb732fdede",
+        "name": "SAMUSE Dollar Bill Changers",
+        "full_name": "Assets root:Current Assets root:Storz Amusements LLC:SAMUSE Operating Cash:SAMUSE Dollar Bill Changers",
+        "type": "ASSET",
+        "parent_guid": "b8814f7c1245497e8a7d063b9e1ab097"
+      },
+      {
+        "guid": "572891558a1048ffb3bc8a84810e0502",
+        "name": "Storz Amusements LLC",
+        "full_name": "Assets root:Fixed Assets root:Storz Amusements LLC",
+        "type": "ASSET",
+        "parent_guid": "f8a026291f7f4f21b66921295eb91c2c"
+      },
+      {
+        "guid": "cac07a897ddf48f68afa64eca3572750",
+        "name": "SAM Fixed Assets",
+        "full_name": "Assets root:Fixed Assets root:Storz Amusements LLC:SAM Fixed Assets",
+        "type": "ASSET",
+        "parent_guid": "572891558a1048ffb3bc8a84810e0502"
+      },
+      {
+        "guid": "b98926afaa014e069e1e51c1ca15fda7",
+        "name": "SAM Asset Depreciation",
+        "full_name": "Assets root:Fixed Assets root:Storz Amusements LLC:SAM Fixed Assets:SAM Asset Depreciation",
+        "type": "ASSET",
+        "parent_guid": "cac07a897ddf48f68afa64eca3572750"
+      },
+      {
+        "guid": "70f5645939da426d99cd8e8e9d16a20c",
+        "name": "SAM Asset Purchases",
+        "full_name": "Assets root:Fixed Assets root:Storz Amusements LLC:SAM Fixed Assets:SAM Asset Purchases",
+        "type": "ASSET",
+        "parent_guid": "cac07a897ddf48f68afa64eca3572750"
+      },
+      {
+        "guid": "61620e65e22f42ec88346a837d6941e9",
+        "name": "SAM_FA Jukeboxes",
+        "full_name": "Assets root:Fixed Assets root:Storz Amusements LLC:SAM Fixed Assets:SAM Asset Purchases:SAM_FA Jukeboxes",
+        "type": "ASSET",
+        "parent_guid": "70f5645939da426d99cd8e8e9d16a20c"
+      },
+      {
+        "guid": "ae7a19c133764710b58f1fa07899f599",
+        "name": "SAM_FA Videogames",
+        "full_name": "Assets root:Fixed Assets root:Storz Amusements LLC:SAM Fixed Assets:SAM Asset Purchases:SAM_FA Videogames",
+        "type": "ASSET",
+        "parent_guid": "70f5645939da426d99cd8e8e9d16a20c"
+      },
+      {
+        "guid": "547337c15b4546429415dffd29c69daf",
+        "name": "OB Storz Amusements LLC",
+        "full_name": "Equity root:Opening Balances root:OB Storz Amusements LLC",
+        "type": "EQUITY",
+        "parent_guid": "6e34f1d4e25f491dbd4fb2a5fcebe6b7"
+      },
+      {
+        "guid": "301db24476924d25ae08c1e51f577935",
+        "name": "Storz Amusements LLC",
+        "full_name": "Expenses root:Storz Amusements LLC",
+        "type": "EXPENSE",
+        "parent_guid": "6b7f7b71f0a748bcb963f3d3e56df580"
+      },
+      {
+        "guid": "78814d22eb824e04806d7ebed64c1f93",
+        "name": "SA Dues and Subscriptions",
+        "full_name": "Expenses root:Storz Amusements LLC:SA Dues and Subscriptions",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "24b607a1131144a393506a53220dff62",
+        "name": "SA Internet Access and subscriptions",
+        "full_name": "Expenses root:Storz Amusements LLC:SA Internet Access and subscriptions",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "e60784a611ef472b9a2f3b6252689aa6",
+        "name": "SA Licenses and Govmnt Fees",
+        "full_name": "Expenses root:Storz Amusements LLC:SA Licenses and Govmnt Fees",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "7ed8e5205ff34338907e1cd5e3ef288f",
+        "name": "SA Office supplies and paper",
+        "full_name": "Expenses root:Storz Amusements LLC:SA Office supplies and paper",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "795aeb3b6da240c390c2711be8999717",
+        "name": "SA Repairs and Maintenance",
+        "full_name": "Expenses root:Storz Amusements LLC:SA Repairs and Maintenance",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "1f8b5ce45d9d4c9aad5a8832c4d5669b",
+        "name": "SAMUSE Property Taxes Paid",
+        "full_name": "Expenses root:Storz Amusements LLC:SAMUSE Property Taxes Paid",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "c426748819254ac191ab93217821819a",
+        "name": "SAMUSE Software Fees",
+        "full_name": "Expenses root:Storz Amusements LLC:SAMUSE Software Fees",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "dee755229b2c4653bc7b3700faca2e34",
+        "name": "SAMUSE Warehouse Rent paid",
+        "full_name": "Expenses root:Storz Amusements LLC:SAMUSE Warehouse Rent paid",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "a37c548759514af39dcc74297a1b468b",
+        "name": "SAMUSE_Gameroom_Commissions_Paid",
+        "full_name": "Expenses root:Storz Amusements LLC:SAMUSE_Gameroom_Commissions_Paid",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "ce68a595c9184205b04c7a0a14a3ad63",
+        "name": "Travel to AMOA Convention",
+        "full_name": "Expenses root:Storz Amusements LLC:Travel to AMOA Convention",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "2e4bd5dbf6694bb3aebb2c6e3c486316",
+        "name": "Travel to TouchTunes Convention",
+        "full_name": "Expenses root:Storz Amusements LLC:Travel to TouchTunes Convention",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
+      },
+      {
+        "guid": "b60bd2e2e98247b0bf6e34f28f6faf69",
+        "name": "Storz Amusements LLC",
+        "full_name": "Income root:Storz Amusements LLC",
+        "type": "INCOME",
+        "parent_guid": "f045f3dc7b5d4c74b341681185ab0186"
+      },
+      {
+        "guid": "a25588a71c3944d99f78fd0b7759d212",
+        "name": "SAMUSE Dart Machine Income",
+        "full_name": "Income root:Storz Amusements LLC:SAMUSE Dart Machine Income",
+        "type": "INCOME",
+        "parent_guid": "b60bd2e2e98247b0bf6e34f28f6faf69"
+      },
+      {
+        "guid": "e8fcb020b91445b8b036d3892dd3ffd6",
+        "name": "SAMUSE Interest Income",
+        "full_name": "Income root:Storz Amusements LLC:SAMUSE Interest Income",
+        "type": "INCOME",
+        "parent_guid": "b60bd2e2e98247b0bf6e34f28f6faf69"
+      },
+      {
+        "guid": "70210b8e1460480faf43a0fcf9ab2019",
+        "name": "SAMUSE Pool Table Income",
+        "full_name": "Income root:Storz Amusements LLC:SAMUSE Pool Table Income",
+        "type": "INCOME",
+        "parent_guid": "b60bd2e2e98247b0bf6e34f28f6faf69"
+      },
+      {
+        "guid": "e7cf4f04896a4ba1bf1aadd2cac219a8",
+        "name": "SAMUSE Product Sales",
+        "full_name": "Income root:Storz Amusements LLC:SAMUSE Product Sales",
+        "type": "INCOME",
+        "parent_guid": "b60bd2e2e98247b0bf6e34f28f6faf69"
+      },
+      {
+        "guid": "6bd6b4972ce04cc08e7d08dbbdd71e05",
+        "name": "SAMUSE_Jukebox_Income",
+        "full_name": "Income root:Storz Amusements LLC:SAMUSE_Jukebox_Income",
+        "type": "INCOME",
+        "parent_guid": "b60bd2e2e98247b0bf6e34f28f6faf69"
+      },
+      {
+        "guid": "0eb26239a60f4217bab0e5f82179db11",
+        "name": "SAMUSE_PhotoBooth_Income",
+        "full_name": "Income root:Storz Amusements LLC:SAMUSE_PhotoBooth_Income",
+        "type": "INCOME",
+        "parent_guid": "b60bd2e2e98247b0bf6e34f28f6faf69"
+      },
+      {
+        "guid": "7d0ddea1e1d044a2bcd25b716a95f5a4",
+        "name": "SAMUSE_Videogame_Income",
+        "full_name": "Income root:Storz Amusements LLC:SAMUSE_Videogame_Income",
+        "type": "INCOME",
+        "parent_guid": "b60bd2e2e98247b0bf6e34f28f6faf69"
+      },
+      {
+        "guid": "08449555319446c4a08831e23da4bf7d",
+        "name": "Storz Amusements LLC",
+        "full_name": "Liabilities root:Loans:Storz Amusements LLC",
+        "type": "LIABILITY",
+        "parent_guid": "626e5c2b1cc446aaae2341f230e1d66d"
+      },
+      {
+        "guid": "9f1198da36b14e91be4701d2dabce2fb",
+        "name": "SAM Covid SBA Loan",
+        "full_name": "Liabilities root:Loans:Storz Amusements LLC:SAM Covid SBA Loan",
+        "type": "LIABILITY",
+        "parent_guid": "08449555319446c4a08831e23da4bf7d"
+      }
+    ],
+    "storz_cash": [
+      {
+        "guid": "ab58ccec6c994d0d92b5da8f03cedcda",
+        "name": "Storz Cash Services LLC",
+        "full_name": "All Bank Checking and Savings Accounts:Storz Cash Services LLC",
+        "type": "BANK",
+        "parent_guid": "6f5c9f3b335d416b8e3a934e3d5eed46"
+      },
+      {
+        "guid": "1d16169c78694baeb65bc8fde63db25e",
+        "name": "SCS Billpay Checking *6241",
+        "full_name": "All Bank Checking and Savings Accounts:Storz Cash Services LLC:SCS Billpay Checking *6241",
+        "type": "BANK",
+        "parent_guid": "ab58ccec6c994d0d92b5da8f03cedcda"
+      },
+      {
+        "guid": "8412669b3cab4ffdb47374af14d1b9a3",
+        "name": "SCS Savings *0327",
+        "full_name": "All Bank Checking and Savings Accounts:Storz Cash Services LLC:SCS Savings *0327",
+        "type": "BANK",
+        "parent_guid": "ab58ccec6c994d0d92b5da8f03cedcda"
+      },
+      {
+        "guid": "0728e91f937949e19501472f6afcb899",
+        "name": "Storz Cash Services",
+        "full_name": "Assets root:Current Assets root:Storz Cash Services",
+        "type": "ASSET",
+        "parent_guid": "ceb700ee369e441c8267a6f7b3912f51"
+      },
+      {
+        "guid": "d713efb08dd14105b2b2a5b07321c6d4",
+        "name": "ATM Vault operating cash placeholder",
+        "full_name": "Assets root:Current Assets root:Storz Cash Services:ATM Vault operating cash placeholder",
+        "type": "ASSET",
+        "parent_guid": "0728e91f937949e19501472f6afcb899"
+      },
+      {
+        "guid": "a0d158a220a748d09ae2c01a77750d98",
+        "name": "SCS ATM Vault Cash in machines",
+        "full_name": "Assets root:Current Assets root:Storz Cash Services:ATM Vault operating cash placeholder:SCS ATM Vault Cash in machines",
+        "type": "ASSET",
+        "parent_guid": "d713efb08dd14105b2b2a5b07321c6d4"
+      },
+      {
+        "guid": "93cf6ed4ece74422a6df60a4d4c72733",
+        "name": "SCS Vault checking *1132 for ATM machines",
+        "full_name": "Assets root:Current Assets root:Storz Cash Services:ATM Vault operating cash placeholder:SCS Vault checking *1132 for ATM machines",
+        "type": "BANK",
+        "parent_guid": "d713efb08dd14105b2b2a5b07321c6d4"
+      },
+      {
+        "guid": "ac52b7c55f2642218b71d4e0fd7ec265",
+        "name": "Storz Cash Services LLC",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC",
+        "type": "ASSET",
+        "parent_guid": "f8a026291f7f4f21b66921295eb91c2c"
+      },
+      {
+        "guid": "a7feb9964f134778a6348b2ced98c917",
+        "name": "SCS Fixed Assets",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets",
+        "type": "ASSET",
+        "parent_guid": "ac52b7c55f2642218b71d4e0fd7ec265"
+      },
+      {
+        "guid": "3ec6669e61234c38b25666ada9ea597e",
+        "name": "SCS Asset Depreciation",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Depreciation",
+        "type": "ASSET",
+        "parent_guid": "a7feb9964f134778a6348b2ced98c917"
+      },
+      {
+        "guid": "1b2445f0be364efa84090ffa4e56a055",
+        "name": "SCS Asset Purchases",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases",
+        "type": "ASSET",
+        "parent_guid": "a7feb9964f134778a6348b2ced98c917"
+      },
+      {
+        "guid": "946f4fcb2c544e84a1c39f6da25ef8c8",
+        "name": "SCS_FA ATM devices",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases:SCS_FA ATM devices",
+        "type": "ASSET",
+        "parent_guid": "1b2445f0be364efa84090ffa4e56a055"
+      },
+      {
+        "guid": "c7a760ce01684713adcf82c8b691d95a",
+        "name": "2024 and before",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases:SCS_FA ATM devices:2024 and before",
+        "type": "ASSET",
+        "parent_guid": "946f4fcb2c544e84a1c39f6da25ef8c8"
+      },
+      {
+        "guid": "ca14697b03d940be85dd24522523d224",
+        "name": "S#TYAH911431 Genmega ATM 2500",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases:SCS_FA ATM devices:2024 and before:S#TYAH911431 Genmega ATM 2500",
+        "type": "ASSET",
+        "parent_guid": "c7a760ce01684713adcf82c8b691d95a"
+      },
+      {
+        "guid": "35c7960753b74304af5e61241ed9a343",
+        "name": "S#TYAH911475 Genmega ATM 2500",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases:SCS_FA ATM devices:2024 and before:S#TYAH911475 Genmega ATM 2500",
+        "type": "ASSET",
+        "parent_guid": "c7a760ce01684713adcf82c8b691d95a"
+      },
+      {
+        "guid": "a3373809f3dc49028cc36a21090cf504",
+        "name": "S#TYAH911816 Genmega ATM 2500",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases:SCS_FA ATM devices:2024 and before:S#TYAH911816 Genmega ATM 2500",
+        "type": "ASSET",
+        "parent_guid": "c7a760ce01684713adcf82c8b691d95a"
+      },
+      {
+        "guid": "703eb11a7c0f48d3954e5146433c5db2",
+        "name": "2025 Purchases",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases:SCS_FA ATM devices:2025 Purchases",
+        "type": "ASSET",
+        "parent_guid": "946f4fcb2c544e84a1c39f6da25ef8c8"
+      },
+      {
+        "guid": "828775c10f2742ce8bc522c9d8a2fbb0",
+        "name": "S#TYAHC64632 Genmega ATM 2500",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases:SCS_FA ATM devices:2025 Purchases:S#TYAHC64632 Genmega ATM 2500",
+        "type": "ASSET",
+        "parent_guid": "703eb11a7c0f48d3954e5146433c5db2"
+      },
+      {
+        "guid": "925a6528cb7245c2a1a43d5bf735881f",
+        "name": "S#TYAHC64698 Genmega ATM 2500",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases:SCS_FA ATM devices:2025 Purchases:S#TYAHC64698 Genmega ATM 2500",
+        "type": "ASSET",
+        "parent_guid": "703eb11a7c0f48d3954e5146433c5db2"
+      },
+      {
+        "guid": "71188a2750bd4ae8abcb496ab1543de8",
+        "name": "S#TYAHC65226 Genmega ATM 2500",
+        "full_name": "Assets root:Fixed Assets root:Storz Cash Services LLC:SCS Fixed Assets:SCS Asset Purchases:SCS_FA ATM devices:2025 Purchases:S#TYAHC65226 Genmega ATM 2500",
+        "type": "ASSET",
+        "parent_guid": "703eb11a7c0f48d3954e5146433c5db2"
+      },
+      {
+        "guid": "7791371a9c2e4a09b3ed8249e4ee22e8",
+        "name": "OB Storz Cash Services LLC",
+        "full_name": "Equity root:Opening Balances root:OB Storz Cash Services LLC",
+        "type": "EQUITY",
+        "parent_guid": "6e34f1d4e25f491dbd4fb2a5fcebe6b7"
+      },
+      {
+        "guid": "15307cc663d947b9a1375af3fac2ee60",
+        "name": "Storz Cash Services LLC",
+        "full_name": "Expenses root:Storz Cash Services LLC",
+        "type": "EXPENSE",
+        "parent_guid": "6b7f7b71f0a748bcb963f3d3e56df580"
+      },
+      {
+        "guid": "d70356d95e374e06bb961f9096846ee2",
+        "name": "Internet Access",
+        "full_name": "Expenses root:Storz Cash Services LLC:Internet Access",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "056562e5767f49bea4979a4edaac3428",
+        "name": "SCS Advertising and Promotion",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Advertising and Promotion",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "3fbf6d2fb54e40e5b3a1f75df97ed830",
+        "name": "SCS Automobile Expenses",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Automobile Expenses",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "8e373294a87a40348e1feaaa3c70db25",
+        "name": "Automobile Fuel",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Automobile Expenses:Automobile Fuel",
+        "type": "EXPENSE",
+        "parent_guid": "3fbf6d2fb54e40e5b3a1f75df97ed830"
+      },
+      {
+        "guid": "82c8d7225c164462997b5de0295aa5e4",
+        "name": "SCS-AUTO Repairs and Maintenance",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Automobile Expenses:SCS-AUTO Repairs and Maintenance",
+        "type": "EXPENSE",
+        "parent_guid": "3fbf6d2fb54e40e5b3a1f75df97ed830"
+      },
+      {
+        "guid": "a4de86b8620548a398c653f1c8f27367",
+        "name": "Tolls and Parking",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Automobile Expenses:Tolls and Parking",
+        "type": "EXPENSE",
+        "parent_guid": "3fbf6d2fb54e40e5b3a1f75df97ed830"
+      },
+      {
+        "guid": "ffee14ef1baa4bbdb9f5e29088fdcf9c",
+        "name": "SCS Bank service charges",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Bank service charges",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "d9c007a58d144a2980b0d767ac877768",
+        "name": "SCS Creditcard Processing",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Creditcard Processing",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "c3dc9c82a9a54ee6b25af4fe82b2b3f6",
+        "name": "SCS Dues and Subscriptions",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Dues and Subscriptions",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "ca75637e84e1490f9d7ffeebd19642cd",
+        "name": "SCS Equipment Repairs",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Equipment Repairs",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "9bf0f95a173343128d9e7428f0f951aa",
+        "name": "SCS Insurance",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Insurance",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "d71e78220e7741fea298f564251c3e7a",
+        "name": "SCS Professional Fees",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Professional Fees",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "8e58919673f846e9a7362615b6c81b5e",
+        "name": "SCS Sales Commission",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Sales Commission",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "886274f7108b4d3fa31db47f8636d644",
+        "name": "SCS Warehouse Rent Paid",
+        "full_name": "Expenses root:Storz Cash Services LLC:SCS Warehouse Rent Paid",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "f3323eb370c142fb9693c2ed06625daf",
+        "name": "Travel to Convention",
+        "full_name": "Expenses root:Storz Cash Services LLC:Travel to Convention",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "ead8e468df25437cad2c1f71169e1f93",
+        "name": "Storz Cash Services",
+        "full_name": "Income root:Storz Cash Services",
+        "type": "INCOME",
+        "parent_guid": "f045f3dc7b5d4c74b341681185ab0186"
+      },
+      {
+        "guid": "0fffaad6276a4d30951ca830dfab7694",
+        "name": "SCS ATM Surcharge Income",
+        "full_name": "Income root:Storz Cash Services:SCS ATM Surcharge Income",
+        "type": "INCOME",
+        "parent_guid": "ead8e468df25437cad2c1f71169e1f93"
+      },
+      {
+        "guid": "25423eb6ea49499682972b6daa9f6582",
+        "name": "SCS Creditcard sales",
+        "full_name": "Income root:Storz Cash Services:SCS Creditcard sales",
+        "type": "INCOME",
+        "parent_guid": "ead8e468df25437cad2c1f71169e1f93"
+      },
+      {
+        "guid": "5bf4cea2619848bb8fb5a4bc8fa19263",
+        "name": "SCS Interest Income",
+        "full_name": "Income root:Storz Cash Services:SCS Interest Income",
+        "type": "INCOME",
+        "parent_guid": "ead8e468df25437cad2c1f71169e1f93"
+      },
+      {
+        "guid": "16a0b16eccfe404680e91884660871ad",
+        "name": "Storz Cash Services",
+        "full_name": "Liabilities root:Loans:Storz Cash Services",
+        "type": "LIABILITY",
+        "parent_guid": "626e5c2b1cc446aaae2341f230e1d66d"
+      },
+      {
+        "guid": "f7b294741e3d44dbbc7ce078b3602ff2",
+        "name": "SCS Covid SBA Loan",
+        "full_name": "Liabilities root:Loans:Storz Cash Services:SCS Covid SBA Loan",
+        "type": "LIABILITY",
+        "parent_guid": "16a0b16eccfe404680e91884660871ad"
+      }
+    ],
+    "storz_property": [
+      {
+        "guid": "7f3573f143cf45d482f4e30ffbf157e7",
+        "name": "Storz Property Management LLC",
+        "full_name": "All Bank Checking and Savings Accounts:Storz Property Management LLC",
+        "type": "BANK",
+        "parent_guid": "6f5c9f3b335d416b8e3a934e3d5eed46"
+      },
+      {
+        "guid": "3a381b46f73e41b3b1dc7d2d3cf39fa3",
+        "name": "SPM main checking *0608",
+        "full_name": "All Bank Checking and Savings Accounts:Storz Property Management LLC:SPM main checking *0608",
+        "type": "BANK",
+        "parent_guid": "7f3573f143cf45d482f4e30ffbf157e7"
+      },
+      {
+        "guid": "2f779f9dbece46dc895137ca802f84da",
+        "name": "Storz Property Management",
+        "full_name": "Assets root:Current Assets root:Storz Property Management",
+        "type": "ASSET",
+        "parent_guid": "ceb700ee369e441c8267a6f7b3912f51"
+      },
+      {
+        "guid": "4e703676f8d04c83a6b7a249ef257782",
+        "name": "Storz Property Management LLC",
+        "full_name": "Assets root:Fixed Assets root:Storz Property Management LLC",
+        "type": "ASSET",
+        "parent_guid": "f8a026291f7f4f21b66921295eb91c2c"
+      },
+      {
+        "guid": "489e4059b2204785a39aacb12cd41b80",
+        "name": "Fixed Assets held by SPMLLC",
+        "full_name": "Assets root:Fixed Assets root:Storz Property Management LLC:Fixed Assets held by SPMLLC",
+        "type": "ASSET",
+        "parent_guid": "4e703676f8d04c83a6b7a249ef257782"
+      },
+      {
+        "guid": "73964730b1f440a1b936725ffe8d0893",
+        "name": "OB Storz Property Mgmnt",
+        "full_name": "Equity root:Opening Balances root:OB Storz Property Mgmnt",
+        "type": "EQUITY",
+        "parent_guid": "6e34f1d4e25f491dbd4fb2a5fcebe6b7"
+      },
+      {
+        "guid": "50f6577d259b48a89797b3cf39719097",
+        "name": "Storz Property Management LLC",
+        "full_name": "Expenses root:Storz Property Management LLC",
+        "type": "EXPENSE",
+        "parent_guid": "6b7f7b71f0a748bcb963f3d3e56df580"
+      },
+      {
+        "guid": "4a698c3b7a4842cab2d274ffba9cf83e",
+        "name": "SPM Building Rent Paid",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Building Rent Paid",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "5e558d7f27664b5ebd88410cf1abe1f1",
+        "name": "SPM Insurance",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Insurance",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "4331d779160d4408b657095b3a8b21c7",
+        "name": "SPM Office supplies expense",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Office supplies expense",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "1697ea6ed2eb48a19cc17fc28abcbb5e",
+        "name": "SPM Postage and Freight",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Postage and Freight",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "99a6332c2ee64b8b800b17fe81703a40",
+        "name": "SPM Professional Fees",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Professional Fees",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "58ee775f870e474dbf66659e9ab025d1",
+        "name": "SPM Property Taxes",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Property Taxes",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "c8075613b22848058781e0cb9ff0e6c1",
+        "name": "SPM Recruitment",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Recruitment",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "38a108bd25284fb6bb9f9d18a741b675",
+        "name": "SPM Repairs and Maintenance",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Repairs and Maintenance",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "c93a07d55c7c4b358781131e4e3db49a",
+        "name": "SPM Travel expenses",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Travel expenses",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "62654de3f4fa4fc4873aa90ca1458447",
+        "name": "SPM Fuel",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Travel expenses:SPM Fuel",
+        "type": "EXPENSE",
+        "parent_guid": "c93a07d55c7c4b358781131e4e3db49a"
+      },
+      {
+        "guid": "1d5a5d36ba954e53b6941449217fcf75",
+        "name": "SPM Meals",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Travel expenses:SPM Meals",
+        "type": "EXPENSE",
+        "parent_guid": "c93a07d55c7c4b358781131e4e3db49a"
+      },
+      {
+        "guid": "f0f21d1643764e6799c215f4a3708987",
+        "name": "SPM Utility expenses",
+        "full_name": "Expenses root:Storz Property Management LLC:SPM Utility expenses",
+        "type": "EXPENSE",
+        "parent_guid": "50f6577d259b48a89797b3cf39719097"
+      },
+      {
+        "guid": "a50f3997c5ff4f729df31f87dff00e39",
+        "name": "Storz Property Management",
+        "full_name": "Income root:Storz Property Management",
+        "type": "INCOME",
+        "parent_guid": "f045f3dc7b5d4c74b341681185ab0186"
+      },
+      {
+        "guid": "adf1c0efe74448dc9932dcd87d5951fe",
+        "name": "SPM Rents Collected",
+        "full_name": "Income root:Storz Property Management:SPM Rents Collected",
+        "type": "INCOME",
+        "parent_guid": "a50f3997c5ff4f729df31f87dff00e39"
+      }
+    ]
+  }
+}

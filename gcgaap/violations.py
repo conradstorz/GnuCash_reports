@@ -264,7 +264,7 @@ def _check_account_mappings(
             account.full_name
         )
         
-        if entity_key is None:
+        if not entity_map.is_explicitly_mapped(account.guid, account.full_name):
             report.unmapped_accounts.append(account)
             
             report.add_violation(
@@ -315,7 +315,7 @@ def _check_entity_balances(
         )
         
         # Skip unmapped accounts (already reported above)
-        if entity_key is None:
+        if not entity_map.is_explicitly_mapped(account.guid, account.full_name):
             continue
         
         # Get account balance

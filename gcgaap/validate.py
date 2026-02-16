@@ -333,7 +333,7 @@ def validate_accounts(
             account.full_name
         )
         
-        if entity_key is None:
+        if not entity_map.is_explicitly_mapped(account.guid, account.full_name):
             unmapped_count += 1
         else:
             entity_counts[entity_key] = entity_counts.get(entity_key, 0) + 1
@@ -486,12 +486,7 @@ def scan_unmapped_accounts(
     unmapped_accounts = []
     
     for account in book.iter_accounts():
-        entity_key = entity_map.resolve_entity_for_account(
-            account.guid,
-            account.full_name
-        )
-        
-        if entity_key is None:
+        if not entity_map.is_explicitly_mapped(account.guid, account.full_name):
             unmapped_accounts.append(account)
     
     logger.info(f"Found {len(unmapped_accounts)} unmapped account(s)")

@@ -79,15 +79,15 @@ def main(ctx, verbose):
     "-e",
     "entity_map_file",
     type=click.Path(path_type=Path),
-    default="entity-map.json",
-    help="Path to the entity mapping JSON file (default: entity-map.json)."
+    default="entity_account_map.json",
+    help="Path to the entity mapping JSON file (default: entity_account_map.json)."
 )
 def entity_scan(book_file, entity_map_file):
     """
     Scan for accounts that have no entity mapping.
     
     Lists all accounts in the GnuCash book that are not currently
-    mapped to any entity in the entity-map.json file.
+    mapped to any entity in the entity_account_map.json file.
     
     This is useful for identifying accounts that need to be added
     to the entity mapping configuration.
@@ -147,8 +147,8 @@ def entity_scan(book_file, entity_map_file):
     "-e",
     "entity_map_file",
     type=click.Path(path_type=Path),
-    default="entity-map.json",
-    help="Path to read/write entity mapping JSON file (default: entity-map.json)."
+    default="entity_account_map.json",
+    help="Path to read/write entity mapping JSON file (default: entity_account_map.json)."
 )
 @click.option(
     "--output",
@@ -259,8 +259,8 @@ def entity_infer(book_file, entity_map_file, output_file, merge):
             
             click.echo(json.dumps(map_dict, indent=2))
             click.echo()
-            click.echo("To save this configuration:")
-            click.echo(f"  gcgaap entity-infer -f {book_file} -o entity-map.json")
+            click.echo("To regenerate entity mapping:")
+            click.echo(f"  gcgaap entity-remap -f {book_file}")
         
         sys.exit(0)
         
@@ -347,6 +347,120 @@ def _merge_entity_maps(existing: EntityMap, suggested: EntityMap) -> EntityMap:
     return merged
 
 
+@main.command(name="entity-remap")
+@click.option(
+    "--file",
+    "-f",
+    "book_file",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to the GnuCash book file (.gnucash)."
+)
+@click.option(
+    "--output",
+    "-o",
+    "output_file",
+    type=click.Path(path_type=Path),
+    default="entity_account_map.json",
+    help="Output JSON file path (default: entity_account_map.json)"
+)
+@click.pass_context
+def entity_remap(ctx, book_file, output_file):
+    """
+    Regenerate entity account mapping from GnuCash database.
+    
+    Scans all accounts in the GnuCash book and maps them to entities
+    based on naming patterns. Uses parent-child inheritance for entity
+    assignment.
+    
+    This is the canonical way to generate the entity_account_map.json
+    file that gcgaap uses for all entity-based operations.
+    """
+    verbose = ctx.obj.get("verbose", False)
+    
+    logger.info("=== GCGAAP Entity Remapping ===")
+    
+    try:
+        # Import the mapper functions from tools
+        import sys
+        from pathlib import Path
+        tools_path = Path(__file__).parent / "tools"
+        sys.path.insert(0, str(tools_path))
+        
+        from entity_account_mapper import (
+            build_entity_patterns,
+            build_account_tree,
+            assign_entities_with_inheritance,
+            generate_entity_report,
+            generate_summary,
+            ENTITIES
+        )
+        from piecash import open_book
+        
+        if verbose:
+            click.echo(f"Opening GnuCash database: {book_file}")
+        
+        # Open the GnuCash book
+        book = open_book(str(book_file), readonly=True, do_backup=False)
+        
+        try:
+            # Build entity patterns
+            if verbose:
+                click.echo("Building entity patterns...")
+            entity_patterns = build_entity_patterns()
+            
+            # Build account tree
+            if verbose:
+                click.echo("Building account tree...")
+            accounts_dict, root_accounts = build_account_tree(book)
+            
+            if verbose:
+                click.echo(f"Found {len(accounts_dict)} accounts")
+            
+            # Assign entities with inheritance
+            if verbose:
+                click.echo("Assigning entities to accounts...")
+            assign_entities_with_inheritance(accounts_dict, root_accounts, entity_patterns)
+            
+            # Generate report
+            if verbose:
+                click.echo("Generating report...")
+            report = generate_entity_report(accounts_dict)
+            summary = generate_summary(report)
+            
+            # Create final output structure
+            output = {
+                "summary": summary,
+                "entities": report,
+            }
+            
+            # Write to JSON file
+            output_path = Path(output_file)
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(output, f, indent=2, ensure_ascii=False)
+            
+            click.echo(f"Entity mapping written to: {output_path}")
+            click.echo()
+            click.echo("Summary:")
+            for entity_key, count in summary["entity_counts"].items():
+                label = summary["entity_labels"][entity_key]
+                click.echo(f"  {label:20s}: {count:4d} accounts")
+            click.echo(f"  {'-' * 26}")
+            click.echo(f"  {'Total':20s}: {summary['total_accounts']:4d} accounts")
+            
+        finally:
+            book.close()
+        
+        sys.exit(0)
+        
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error during entity remapping: {e}", exc_info=True)
+        sys.exit(1)
+
+
 @main.command()
 @click.option(
     "--file",
@@ -361,8 +475,8 @@ def _merge_entity_maps(existing: EntityMap, suggested: EntityMap) -> EntityMap:
     "-e",
     "entity_map_file",
     type=click.Path(path_type=Path),
-    default="entity-map.json",
-    help="Path to the entity mapping JSON file (default: entity-map.json)."
+    default="entity_account_map.json",
+    help="Path to the entity mapping JSON file (default: entity_account_map.json)."
 )
 @click.option(
     "--tolerance",
@@ -633,8 +747,8 @@ def diff_snapshots(before_file, after_file, output_file, format):
     "-e",
     "entity_map_file",
     type=click.Path(path_type=Path),
-    default="entity-map.json",
-    help="Path to the entity mapping JSON file (default: entity-map.json)."
+    default="entity_account_map.json",
+    help="Path to the entity mapping JSON file (default: entity_account_map.json)."
 )
 @click.option(
     "--as-of",
@@ -848,8 +962,8 @@ def repair_dates(book_file, diagnose_only, no_backup):
     "-e",
     "entity_map_file",
     type=click.Path(path_type=Path),
-    default="entity-map.json",
-    help="Path to the entity mapping JSON file (default: entity-map.json)."
+    default="entity_account_map.json",
+    help="Path to the entity mapping JSON file (default: entity_account_map.json)."
 )
 @click.option(
     "--as-of",
