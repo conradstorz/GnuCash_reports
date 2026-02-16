@@ -6,7 +6,7 @@ authors = [
     {name = "Conrad Storz"}
 ]
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "Non-Commercial Open Source License"}
 requires-python = ">=3.10"
 dependencies = [
     "piecash>=1.2.0",  # GnuCash file access via SQLAlchemy
