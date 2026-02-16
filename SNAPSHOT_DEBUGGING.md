@@ -15,7 +15,7 @@ The snapshot tool captures the complete state of your GnuCash database and allow
 Before fixing a transaction or running your bill creation utility:
 
 ```bash
-gcgaap snapshot -f "D:\Users\Conrad\Documents\GnuCash\gnuCash414\CFSIV_Sqlite3_database.gnucash" -o snapshot_before.json
+gcgaap snapshot -f "path/to/mybook.gnucash" -o snapshot_before.json
 ```
 
 **Output:**
@@ -39,7 +39,7 @@ Now do ONE of the following:
 ### 3. Capture an "After" Snapshot
 
 ```bash
-gcgaap snapshot -f "D:\Users\Conrad\Documents\GnuCash\gnuCash414\CFSIV_Sqlite3_database.gnucash" -o snapshot_after.json
+gcgaap snapshot -f "path/to/mybook.gnucash" -o snapshot_after.json
 ```
 
 ### 4. Compare the Snapshots
