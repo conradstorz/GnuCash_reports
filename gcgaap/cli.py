@@ -30,6 +30,11 @@ from .snapshot import (
     compare_snapshots,
     format_comparison_text
 )
+from .repair import (
+    diagnose_empty_reconcile_dates,
+    repair_empty_reconcile_dates,
+    RepairResult
+)
 
 logger = logging.getLogger(__name__)
 
@@ -721,6 +726,111 @@ def violations(book_file, entity_map_file, as_of, tolerance):
         sys.exit(1)
     except Exception as e:
         logger.error(f"Error generating violations report: {e}", exc_info=True)
+        sys.exit(1)
+
+
+@main.command(name="repair-dates")
+@click.option(
+    "--file",
+    "-f",
+    "book_file",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to the GnuCash book file (.gnucash)."
+)
+@click.option(
+    "--diagnose-only",
+    is_flag=True,
+    help="Only diagnose issues without making changes."
+)
+@click.option(
+    "--no-backup",
+    is_flag=True,
+    help="Skip backup creation (not recommended)."
+)
+def repair_dates(book_file, diagnose_only, no_backup):
+    """
+    Repair empty reconcile_date fields in GnuCash database.
+    
+    This command fixes a common data integrity issue where split records
+    have empty strings ('') in the reconcile_date field instead of NULL.
+    This causes piecash to fail with: "Couldn't parse datetime string: ''"
+    
+    The repair sets these empty strings to NULL, which piecash handles correctly.
+    
+    \b
+    By default, this command:
+    - Creates a timestamped backup before making changes
+    - Repairs all empty reconcile_date fields
+    - Verifies the repair was successful
+    
+    Use --diagnose-only to check for issues without making changes.
+    """
+    logger.info("=== GCGAAP Database Repair: Empty Reconcile Dates ===")
+    
+    try:
+        # Diagnose the issue
+        logger.info(f"Analyzing database: {book_file}")
+        count, descriptions = diagnose_empty_reconcile_dates(book_file)
+        
+        if count == 0:
+            click.echo("\n✓ No empty reconcile_date fields found.")
+            click.echo("Your database is clean - no repairs needed!")
+            sys.exit(0)
+        
+        # Show diagnosis
+        click.echo(f"\n⚠️  Found {count} split(s) with empty reconcile_date field")
+        click.echo(f"\nAffected transactions ({len(descriptions)}):")
+        for desc in descriptions[:10]:  # Show first 10
+            click.echo(f"  - {desc}")
+        if len(descriptions) > 10:
+            click.echo(f"  ... and {len(descriptions) - 10} more")
+        
+        click.echo(f"\nThis prevents piecash from reading these transactions.")
+        click.echo("Error message: \"Couldn't parse datetime string: ''\"\n")
+        
+        # If diagnose-only, stop here
+        if diagnose_only:
+            click.echo("Diagnosis complete. Run without --diagnose-only to repair.")
+            sys.exit(0)
+        
+        # Confirm repair
+        if not no_backup:
+            click.echo("A backup will be created before making changes.")
+        else:
+            click.echo("⚠️  WARNING: No backup will be created (--no-backup flag)")
+        
+        click.echo("\nProceeding with repair...")
+        
+        # Perform repair
+        result = repair_empty_reconcile_dates(
+            book_file,
+            create_backup_first=not no_backup
+        )
+        
+        # Report results
+        click.echo()
+        if result.success:
+            click.echo(f"✓ {result.message}")
+            if result.backup_path:
+                click.echo(f"✓ Backup saved to: {result.backup_path}")
+            click.echo(f"\nRepaired {result.items_fixed} split(s) successfully!")
+            click.echo("\nYou can now run validation and reports without errors.")
+            click.echo("If everything works, you can delete the backup file.")
+            sys.exit(0)
+        else:
+            click.echo(f"⚠️  {result.message}")
+            if result.backup_path:
+                click.echo(f"Backup saved to: {result.backup_path}")
+            click.echo("\nPartial repair completed. Some issues may remain.")
+            sys.exit(1)
+        
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error during repair: {e}", exc_info=True)
+        click.echo(f"\n❌ Repair failed: {e}")
         sys.exit(1)
 
 
