@@ -49,7 +49,7 @@ entity-map-*.json
 
 # Operational data (contains private database information)
 snapshot_*.json
-validation_report.*
+validation_report*
 diff_results.json
 
 # Deprecated diagnostic scripts
