@@ -1,12 +1,12 @@
 {
   "summary": {
-    "total_accounts": 171,
+    "total_accounts": 184,
     "entity_counts": {
-      "unassigned": 15,
+      "unassigned": 20,
       "personal": 56,
-      "storz_amusements": 36,
-      "storz_cash": 43,
-      "storz_property": 21
+      "storz_amusements": 40,
+      "storz_cash": 45,
+      "storz_property": 23
     },
     "entity_labels": {
       "unassigned": "Unassigned",
@@ -54,6 +54,13 @@
         "parent_guid": null
       },
       {
+        "guid": "1b6297a16c474e19801a9b4a02b1d07a",
+        "name": "Inter Entity xfers",
+        "full_name": "Equity root:Inter Entity xfers",
+        "type": "EQUITY",
+        "parent_guid": "86da0cb0a9a2463b99d3d24c9ab405e0"
+      },
+      {
         "guid": "6e34f1d4e25f491dbd4fb2a5fcebe6b7",
         "name": "Opening Balances root",
         "full_name": "Equity root:Opening Balances root",
@@ -96,6 +103,34 @@
         "parent_guid": "171683286aa948288674572890c30765"
       },
       {
+        "guid": "0431a435ff104376bd3de4ce652dd99f",
+        "name": "Credit Cards",
+        "full_name": "Liabilities root:Credit Cards",
+        "type": "LIABILITY",
+        "parent_guid": "171683286aa948288674572890c30765"
+      },
+      {
+        "guid": "0b0970a26104499dbcf9c1bac6619de2",
+        "name": "American Express Card",
+        "full_name": "Liabilities root:Credit Cards:American Express Card",
+        "type": "LIABILITY",
+        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
+      },
+      {
+        "guid": "5aa4d661ebfb487abf53d998f470cc7e",
+        "name": "Chase Amazon card",
+        "full_name": "Liabilities root:Credit Cards:Chase Amazon card",
+        "type": "LIABILITY",
+        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
+      },
+      {
+        "guid": "9038eac6a9dc40958c7d804759bbd542",
+        "name": "Citibank Costco card",
+        "full_name": "Liabilities root:Credit Cards:Citibank Costco card",
+        "type": "LIABILITY",
+        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
+      },
+      {
         "guid": "626e5c2b1cc446aaae2341f230e1d66d",
         "name": "Loans",
         "full_name": "Liabilities root:Loans",
@@ -103,9 +138,9 @@
         "parent_guid": "171683286aa948288674572890c30765"
       },
       {
-        "guid": "b19eef719cf94f1e852ca0fcb7de63e0",
-        "name": "Sales Tax",
-        "full_name": "Liabilities root:Sales Tax",
+        "guid": "90bdc6177ec646029f4418d1faf4d04c",
+        "name": "Sales Tax Collections",
+        "full_name": "Liabilities root:Sales Tax Collections",
         "type": "LIABILITY",
         "parent_guid": "171683286aa948288674572890c30765"
       },
@@ -117,9 +152,9 @@
         "parent_guid": null
       },
       {
-        "guid": "8f39c518dd514e728fa99d1e37e46607",
-        "name": "Receivables",
-        "full_name": "Receivables",
+        "guid": "beb90bb31dea4af99c8c55170519c84f",
+        "name": "Receivables root",
+        "full_name": "Receivables root",
         "type": "RECEIVABLE",
         "parent_guid": null
       }
@@ -301,6 +336,27 @@
         "parent_guid": "86da0cb0a9a2463b99d3d24c9ab405e0"
       },
       {
+        "guid": "7e88ef442d1f48d3b4d94b5b5703ab8d",
+        "name": "DUE from SAMUSE",
+        "full_name": "Equity root:3023 Old hill Rd. Owners Investments:DUE from SAMUSE",
+        "type": "EQUITY",
+        "parent_guid": "b44c8a7056e0406eb013e1c59b529ea5"
+      },
+      {
+        "guid": "a8501f0b23494969a6f255f04e311d62",
+        "name": "DUE from SCSLLC",
+        "full_name": "Equity root:3023 Old hill Rd. Owners Investments:DUE from SCSLLC",
+        "type": "EQUITY",
+        "parent_guid": "b44c8a7056e0406eb013e1c59b529ea5"
+      },
+      {
+        "guid": "c2c37c6749794d9ca704714ce16db11a",
+        "name": "DUE from SMPLLC",
+        "full_name": "Equity root:3023 Old hill Rd. Owners Investments:DUE from SMPLLC",
+        "type": "EQUITY",
+        "parent_guid": "b44c8a7056e0406eb013e1c59b529ea5"
+      },
+      {
         "guid": "1cb456da520d4309a6674526e6db4c61",
         "name": "Input from Conrad Storz",
         "full_name": "Equity root:3023 Old hill Rd. Owners Investments:Input from Conrad Storz",
@@ -476,32 +532,11 @@
         "parent_guid": "b9a4974de8b54e8185b6953b8c06ad4f"
       },
       {
-        "guid": "0431a435ff104376bd3de4ce652dd99f",
-        "name": "3023 Old Hill Rd. Credit Cards",
-        "full_name": "Liabilities root:3023 Old Hill Rd. Credit Cards",
+        "guid": "cfe941e9f0d94e32b4dd18d3d38ef293",
+        "name": "Personal Citicard charges",
+        "full_name": "Liabilities root:Credit Cards:Citibank Costco card:Personal Citicard charges",
         "type": "LIABILITY",
-        "parent_guid": "171683286aa948288674572890c30765"
-      },
-      {
-        "guid": "0b0970a26104499dbcf9c1bac6619de2",
-        "name": "American Express Card",
-        "full_name": "Liabilities root:3023 Old Hill Rd. Credit Cards:American Express Card",
-        "type": "LIABILITY",
-        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
-      },
-      {
-        "guid": "5aa4d661ebfb487abf53d998f470cc7e",
-        "name": "Chase Amazon card",
-        "full_name": "Liabilities root:3023 Old Hill Rd. Credit Cards:Chase Amazon card",
-        "type": "LIABILITY",
-        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
-      },
-      {
-        "guid": "9038eac6a9dc40958c7d804759bbd542",
-        "name": "Citibank Costco card",
-        "full_name": "Liabilities root:3023 Old Hill Rd. Credit Cards:Citibank Costco card",
-        "type": "LIABILITY",
-        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
+        "parent_guid": "9038eac6a9dc40958c7d804759bbd542"
       },
       {
         "guid": "815ca6b95bb3447bbcb68c65b53aedb7",
@@ -611,6 +646,13 @@
         "parent_guid": "70f5645939da426d99cd8e8e9d16a20c"
       },
       {
+        "guid": "439cce0ae18649d2af538019d85afadc",
+        "name": "SAMUSE owes Conrad",
+        "full_name": "Equity root:Inter Entity xfers:SAMUSE owes Conrad",
+        "type": "EQUITY",
+        "parent_guid": "1b6297a16c474e19801a9b4a02b1d07a"
+      },
+      {
         "guid": "547337c15b4546429415dffd29c69daf",
         "name": "OB Storz Amusements LLC",
         "full_name": "Equity root:Opening Balances root:OB Storz Amusements LLC",
@@ -623,6 +665,13 @@
         "full_name": "Expenses root:Storz Amusements LLC",
         "type": "EXPENSE",
         "parent_guid": "6b7f7b71f0a748bcb963f3d3e56df580"
+      },
+      {
+        "guid": "dee755229b2c4653bc7b3700faca2e34",
+        "name": "Rent Expense (SAMUSE)",
+        "full_name": "Expenses root:Storz Amusements LLC:Rent Expense (SAMUSE)",
+        "type": "EXPENSE",
+        "parent_guid": "301db24476924d25ae08c1e51f577935"
       },
       {
         "guid": "78814d22eb824e04806d7ebed64c1f93",
@@ -670,13 +719,6 @@
         "guid": "c426748819254ac191ab93217821819a",
         "name": "SAMUSE Software Fees",
         "full_name": "Expenses root:Storz Amusements LLC:SAMUSE Software Fees",
-        "type": "EXPENSE",
-        "parent_guid": "301db24476924d25ae08c1e51f577935"
-      },
-      {
-        "guid": "dee755229b2c4653bc7b3700faca2e34",
-        "name": "SAMUSE Warehouse Rent paid",
-        "full_name": "Expenses root:Storz Amusements LLC:SAMUSE Warehouse Rent paid",
         "type": "EXPENSE",
         "parent_guid": "301db24476924d25ae08c1e51f577935"
       },
@@ -758,6 +800,13 @@
         "parent_guid": "b60bd2e2e98247b0bf6e34f28f6faf69"
       },
       {
+        "guid": "03050227279046f08803c5ba5c54e595",
+        "name": "SAMUSE Citicard Expenses",
+        "full_name": "Liabilities root:Credit Cards:Citibank Costco card:SAMUSE Citicard Expenses",
+        "type": "LIABILITY",
+        "parent_guid": "9038eac6a9dc40958c7d804759bbd542"
+      },
+      {
         "guid": "08449555319446c4a08831e23da4bf7d",
         "name": "Storz Amusements LLC",
         "full_name": "Liabilities root:Loans:Storz Amusements LLC",
@@ -770,6 +819,20 @@
         "full_name": "Liabilities root:Loans:Storz Amusements LLC:SAM Covid SBA Loan",
         "type": "LIABILITY",
         "parent_guid": "08449555319446c4a08831e23da4bf7d"
+      },
+      {
+        "guid": "b19eef719cf94f1e852ca0fcb7de63e0",
+        "name": "SAMUSE Sales Tax",
+        "full_name": "Liabilities root:Sales Tax Collections:SAMUSE Sales Tax",
+        "type": "LIABILITY",
+        "parent_guid": "90bdc6177ec646029f4418d1faf4d04c"
+      },
+      {
+        "guid": "8f39c518dd514e728fa99d1e37e46607",
+        "name": "SAMUSE Receivables",
+        "full_name": "Receivables root:SAMUSE Receivables",
+        "type": "RECEIVABLE",
+        "parent_guid": "beb90bb31dea4af99c8c55170519c84f"
       }
     ],
     "storz_cash": [
@@ -914,6 +977,13 @@
         "parent_guid": "703eb11a7c0f48d3954e5146433c5db2"
       },
       {
+        "guid": "7812c3241cda413891d3dcb0e429ce26",
+        "name": "SCSLLC owes Conrad",
+        "full_name": "Equity root:Inter Entity xfers:SCSLLC owes Conrad",
+        "type": "EQUITY",
+        "parent_guid": "1b6297a16c474e19801a9b4a02b1d07a"
+      },
+      {
         "guid": "7791371a9c2e4a09b3ed8249e4ee22e8",
         "name": "OB Storz Cash Services LLC",
         "full_name": "Equity root:Opening Balances root:OB Storz Cash Services LLC",
@@ -928,16 +998,23 @@
         "parent_guid": "6b7f7b71f0a748bcb963f3d3e56df580"
       },
       {
-        "guid": "d70356d95e374e06bb961f9096846ee2",
-        "name": "Internet Access",
-        "full_name": "Expenses root:Storz Cash Services LLC:Internet Access",
+        "guid": "056562e5767f49bea4979a4edaac3428",
+        "name": "Advertising and Promotion (SCSLLC)",
+        "full_name": "Expenses root:Storz Cash Services LLC:Advertising and Promotion (SCSLLC)",
         "type": "EXPENSE",
         "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
       },
       {
-        "guid": "056562e5767f49bea4979a4edaac3428",
-        "name": "SCS Advertising and Promotion",
-        "full_name": "Expenses root:Storz Cash Services LLC:SCS Advertising and Promotion",
+        "guid": "d70356d95e374e06bb961f9096846ee2",
+        "name": "Internet Access (SCSLLC)",
+        "full_name": "Expenses root:Storz Cash Services LLC:Internet Access (SCSLLC)",
+        "type": "EXPENSE",
+        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
+      },
+      {
+        "guid": "886274f7108b4d3fa31db47f8636d644",
+        "name": "Rent Expense (SCSLLC)",
+        "full_name": "Expenses root:Storz Cash Services LLC:Rent Expense (SCSLLC)",
         "type": "EXPENSE",
         "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
       },
@@ -1019,13 +1096,6 @@
         "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
       },
       {
-        "guid": "886274f7108b4d3fa31db47f8636d644",
-        "name": "SCS Warehouse Rent Paid",
-        "full_name": "Expenses root:Storz Cash Services LLC:SCS Warehouse Rent Paid",
-        "type": "EXPENSE",
-        "parent_guid": "15307cc663d947b9a1375af3fac2ee60"
-      },
-      {
         "guid": "f3323eb370c142fb9693c2ed06625daf",
         "name": "Travel to Convention",
         "full_name": "Expenses root:Storz Cash Services LLC:Travel to Convention",
@@ -1059,6 +1129,13 @@
         "full_name": "Income root:Storz Cash Services:SCS Interest Income",
         "type": "INCOME",
         "parent_guid": "ead8e468df25437cad2c1f71169e1f93"
+      },
+      {
+        "guid": "b7c0b4be84934bfcb66cc647e378292b",
+        "name": "SCSLLC Citicard Expenses",
+        "full_name": "Liabilities root:Credit Cards:Citibank Costco card:SCSLLC Citicard Expenses",
+        "type": "LIABILITY",
+        "parent_guid": "9038eac6a9dc40958c7d804759bbd542"
       },
       {
         "guid": "16a0b16eccfe404680e91884660871ad",
@@ -1112,6 +1189,13 @@
         "parent_guid": "4e703676f8d04c83a6b7a249ef257782"
       },
       {
+        "guid": "a3d190e79f534786b4c5439ca00c21b1",
+        "name": "SPMLLC owes Conrad",
+        "full_name": "Equity root:Inter Entity xfers:SPMLLC owes Conrad",
+        "type": "EQUITY",
+        "parent_guid": "1b6297a16c474e19801a9b4a02b1d07a"
+      },
+      {
         "guid": "73964730b1f440a1b936725ffe8d0893",
         "name": "OB Storz Property Mgmnt",
         "full_name": "Equity root:Opening Balances root:OB Storz Property Mgmnt",
@@ -1127,8 +1211,8 @@
       },
       {
         "guid": "4a698c3b7a4842cab2d274ffba9cf83e",
-        "name": "SPM Building Rent Paid",
-        "full_name": "Expenses root:Storz Property Management LLC:SPM Building Rent Paid",
+        "name": "Rent Expense (SPMLLC)",
+        "full_name": "Expenses root:Storz Property Management LLC:Rent Expense (SPMLLC)",
         "type": "EXPENSE",
         "parent_guid": "50f6577d259b48a89797b3cf39719097"
       },
@@ -1218,10 +1302,17 @@
       },
       {
         "guid": "adf1c0efe74448dc9932dcd87d5951fe",
-        "name": "SPM Rents Collected",
-        "full_name": "Income root:Storz Property Management:SPM Rents Collected",
+        "name": "Rental Income",
+        "full_name": "Income root:Storz Property Management:Rental Income",
         "type": "INCOME",
         "parent_guid": "a50f3997c5ff4f729df31f87dff00e39"
+      },
+      {
+        "guid": "e82c896c52754562a23465c93f2188dd",
+        "name": "SPMLLC Citicard Expenses",
+        "full_name": "Liabilities root:Credit Cards:Citibank Costco card:SPMLLC Citicard Expenses",
+        "type": "LIABILITY",
+        "parent_guid": "9038eac6a9dc40958c7d804759bbd542"
       }
     ]
   }

@@ -19,6 +19,7 @@ from .gnucash_access import GnuCashBook, parse_date
 from .validate import validate_book, scan_unmapped_accounts
 from .entity_inference import EntityInferenceEngine
 from .violations import generate_violations_report, format_violations_report
+from .cross_entity import analyze_cross_entity_transactions
 from .reports.balance_sheet import (
     generate_balance_sheet,
     format_as_text,
@@ -843,6 +844,103 @@ def violations(book_file, entity_map_file, as_of, tolerance):
         sys.exit(1)
 
 
+@main.command(name="cross-entity")
+@click.option(
+    "--file",
+    "-f",
+    "book_file",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to the GnuCash book file (.gnucash)."
+)
+@click.option(
+    "--entity-map",
+    "-e",
+    "entity_map_file",
+    type=click.Path(path_type=Path),
+    default="entity_account_map.json",
+    help="Path to the entity mapping JSON file (default: entity_account_map.json)."
+)
+@click.option(
+    "--as-of",
+    type=str,
+    default=None,
+    help="Analysis date in YYYY-MM-DD format (default: all transactions)."
+)
+def cross_entity(book_file, entity_map_file, as_of):
+    """
+    Analyze cross-entity transactions and identify imbalances.
+    
+    This command identifies transactions where splits belong to different
+    entities, which commonly occurs when:
+    
+    \b
+    - Shared credit cards are used for multiple businesses/personal expenses
+    - One entity pays expenses on behalf of another
+    - Inter-entity transfers occur
+    
+    The report shows:
+    \b
+    - All cross-entity transactions
+    - Net imbalance for each entity
+    - Inter-entity balances (who owes whom)
+    - Specific recommendations for creating balancing entries
+    
+    Use this command when your entity balance sheets don't balance due to
+    shared accounts or cross-entity payments.
+    """
+    logger.info("=== GCGAAP Cross-Entity Transaction Analysis ===")
+    
+    try:
+        # Load entity map
+        entity_map = EntityMap.load(entity_map_file)
+        
+        # Parse as_of_date
+        as_of_date = None
+        if as_of:
+            as_of_date = parse_date(as_of)
+            click.echo(f"Analyzing transactions as of {as_of_date}")
+        else:
+            click.echo("Analyzing all transactions")
+        click.echo()
+        
+        # Open book and analyze
+        with GnuCashBook(book_file) as book:
+            analysis = analyze_cross_entity_transactions(
+                book=book,
+                entity_map=entity_map,
+                as_of_date=as_of_date
+            )
+        
+        # Display summary
+        summary = analysis.format_summary()
+        click.echo(summary)
+        click.echo()
+        
+        # Display recommendations
+        recommendations = analysis.format_recommendations()
+        click.echo(recommendations)
+        
+        # Exit with appropriate code
+        if analysis.get_entities_with_imbalances():
+            click.echo("\n[ACTION NEEDED] Cross-entity imbalances detected.")
+            click.echo("Review recommendations above and create balancing entries.")
+            sys.exit(1)
+        else:
+            click.echo("\n[OK] All cross-entity transactions are balanced.")
+            sys.exit(0)
+        
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        sys.exit(1)
+    except ValueError as e:
+        logger.error(f"Invalid input: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error analyzing cross-entity transactions: {e}", exc_info=True)
+        sys.exit(1)
+
+
 @main.command(name="repair-dates")
 @click.option(
     "--file",
@@ -945,6 +1043,229 @@ def repair_dates(book_file, diagnose_only, no_backup):
     except Exception as e:
         logger.error(f"Error during repair: {e}", exc_info=True)
         click.echo(f"\n❌ Repair failed: {e}")
+        sys.exit(1)
+
+
+@main.command(name="balance-check")
+@click.option(
+    "--file",
+    "-f",
+    "book_file",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to the GnuCash book file (.gnucash)."
+)
+@click.option(
+    "--entity-map",
+    "-e",
+    "entity_map_file",
+    type=click.Path(path_type=Path),
+    default="entity_account_map.json",
+    help="Path to the entity mapping JSON file (default: entity_account_map.json)."
+)
+@click.option(
+    "--as-of",
+    type=str,
+    required=True,
+    help="Balance sheet date in YYYY-MM-DD format."
+)
+def balance_check(book_file, entity_map_file, as_of):
+    """
+    Quick balance check for all entities and consolidated.
+    
+    Generates a summary report showing which entities have balanced
+    accounting equations and which have imbalances. This is useful
+    for quickly identifying data integrity issues across all entities.
+    
+    Shows:
+    - Consolidated (all entities) balance status
+    - Individual entity balance status
+    - Imbalance amounts for entities that don't balance
+    """
+    logger.info("=== GCGAAP Balance Check (All Entities) ===")
+    
+    try:
+        # Create configuration
+        config = GCGAAPConfig()
+        
+        # Load entity map
+        entity_map = EntityMap.load(entity_map_file)
+        
+        # Store results
+        results = []
+        
+        # Open book
+        with GnuCashBook(book_file) as book:
+            # Check consolidated first
+            click.echo("\n" + "=" * 80)
+            click.echo(f"BALANCE CHECK REPORT - As of {as_of}")
+            click.echo("=" * 80)
+            click.echo("\nChecking consolidated (all entities)...")
+            
+            try:
+                bs = generate_balance_sheet(
+                    book=book,
+                    entity_map=entity_map,
+                    as_of_date_str=as_of,
+                    entity_key=None,
+                    config=config
+                )
+                results.append({
+                    "entity": "CONSOLIDATED",
+                    "label": "Consolidated (All Entities)",
+                    "balanced": True,
+                    "assets": bs.total_assets,
+                    "liabilities": bs.total_liabilities,
+                    "equity": bs.total_equity,
+                    "imbalance": 0.0
+                })
+            except ValueError as e:
+                # Extract imbalance from error message
+                error_str = str(e)
+                if "Imbalance (A - L - E):" in error_str:
+                    lines = error_str.split('\n')
+                    assets = liabilities = equity = imbalance = 0.0
+                    for line in lines:
+                        if line.startswith("Assets:"):
+                            assets = float(line.split(":")[1].strip().replace(",", ""))
+                        elif line.startswith("Liabilities:"):
+                            liabilities = float(line.split(":")[1].strip().replace(",", ""))
+                        elif line.startswith("Equity:"):
+                            equity = float(line.split(":")[1].strip().replace(",", ""))
+                        elif line.startswith("Imbalance"):
+                            imbalance = float(line.split(":")[1].strip().replace(",", ""))
+                    results.append({
+                        "entity": "CONSOLIDATED",
+                        "label": "Consolidated (All Entities)",
+                        "balanced": False,
+                        "assets": assets,
+                        "liabilities": liabilities,
+                        "equity": equity,
+                        "imbalance": imbalance
+                    })
+                else:
+                    results.append({
+                        "entity": "CONSOLIDATED",
+                        "label": "Consolidated (All Entities)",
+                        "balanced": False,
+                        "assets": 0.0,
+                        "liabilities": 0.0,
+                        "equity": 0.0,
+                        "imbalance": 0.0,
+                        "error": str(e)
+                    })
+            
+            # Check each entity
+            for entity_key, entity_config in entity_map.entities.items():
+                if entity_key == "unassigned":
+                    continue  # Skip unassigned structural accounts
+                
+                entity_label = entity_config.label
+                click.echo(f"Checking {entity_label}...")
+                
+                try:
+                    bs = generate_balance_sheet(
+                        book=book,
+                        entity_map=entity_map,
+                        as_of_date_str=as_of,
+                        entity_key=entity_key,
+                        config=config
+                    )
+                    results.append({
+                        "entity": entity_key,
+                        "label": entity_label,
+                        "balanced": True,
+                        "assets": bs.total_assets,
+                        "liabilities": bs.total_liabilities,
+                        "equity": bs.total_equity,
+                        "imbalance": 0.0
+                    })
+                except ValueError as e:
+                    # Extract imbalance from error message
+                    error_str = str(e)
+                    if "Imbalance (A - L - E):" in error_str:
+                        lines = error_str.split('\n')
+                        assets = liabilities = equity = imbalance = 0.0
+                        for line in lines:
+                            if line.startswith("Assets:"):
+                                assets = float(line.split(":")[1].strip().replace(",", ""))
+                            elif line.startswith("Liabilities:"):
+                                liabilities = float(line.split(":")[1].strip().replace(",", ""))
+                            elif line.startswith("Equity:"):
+                                equity = float(line.split(":")[1].strip().replace(",", ""))
+                            elif line.startswith("Imbalance"):
+                                imbalance = float(line.split(":")[1].strip().replace(",", ""))
+                        results.append({
+                            "entity": entity_key,
+                            "label": entity_label,
+                            "balanced": False,
+                            "assets": assets,
+                            "liabilities": liabilities,
+                            "equity": equity,
+                            "imbalance": imbalance
+                        })
+                    else:
+                        results.append({
+                            "entity": entity_key,
+                            "label": entity_label,
+                            "balanced": False,
+                            "assets": 0.0,
+                            "liabilities": 0.0,
+                            "equity": 0.0,
+                            "imbalance": 0.0,
+                            "error": str(e)
+                        })
+        
+        # Display summary
+        click.echo("\n" + "=" * 80)
+        click.echo("SUMMARY")
+        click.echo("=" * 80)
+        
+        balanced_count = sum(1 for r in results if r["balanced"])
+        imbalanced_count = len(results) - balanced_count
+        
+        # Show balanced entities
+        if balanced_count > 0:
+            click.echo(f"\n✓ BALANCED ({balanced_count}):")
+            click.echo("-" * 80)
+            for result in results:
+                if result["balanced"]:
+                    click.echo(f"  ✓ {result['label']:40s} "
+                             f"A: ${result['assets']:>15,.2f}  "
+                             f"L: ${result['liabilities']:>15,.2f}  "
+                             f"E: ${result['equity']:>15,.2f}")
+        
+        # Show imbalanced entities
+        if imbalanced_count > 0:
+            click.echo(f"\n✗ IMBALANCED ({imbalanced_count}):")
+            click.echo("-" * 80)
+            for result in results:
+                if not result["balanced"]:
+                    if "error" in result:
+                        click.echo(f"  ✗ {result['label']:40s} ERROR: {result['error']}")
+                    else:
+                        click.echo(f"  ✗ {result['label']:40s} "
+                                 f"A: ${result['assets']:>15,.2f}  "
+                                 f"L: ${result['liabilities']:>15,.2f}  "
+                                 f"E: ${result['equity']:>15,.2f}  "
+                                 f"Imbalance: ${result['imbalance']:>15,.2f}")
+        
+        click.echo("\n" + "=" * 80)
+        
+        if imbalanced_count == 0:
+            click.echo("✓ ALL ENTITIES BALANCED - Books are in good order!")
+            sys.exit(0)
+        else:
+            click.echo(f"✗ {imbalanced_count} entity/entities have accounting equation violations")
+            click.echo("  Review and fix imbalanced entities before generating reports.")
+            sys.exit(1)
+        
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error during balance check: {e}", exc_info=True)
+        click.echo(f"\n✗ Balance check failed: {e}")
         sys.exit(1)
 
 
