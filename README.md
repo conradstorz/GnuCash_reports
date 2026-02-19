@@ -112,6 +112,26 @@ gcgaap balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 
 gcgaap balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --format json
 ```
 
+**Check entity balances quickly**
+
+```bash
+# Quick check if all entities balance
+gcgaap balance-check --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31
+```
+
+**Analyze cross-entity transactions**
+
+```bash
+# Basic summary of cross-entity transactions
+gcgaap cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31
+
+# Show detailed transaction list
+gcgaap cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --verbose
+
+# Show simplified one-line format
+gcgaap cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --simple
+```
+
 **Track database changes**
 
 Capture snapshots to see what changed:
@@ -220,6 +240,16 @@ gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json
 
 This lists all unmapped accounts with their GUIDs.
 
+### Regenerating Entity Maps
+
+To regenerate the entire entity mapping from your GnuCash database:
+
+```bash
+gcgaap entity-remap --file mybook.gnucash --output entity-map.json
+```
+
+This scans all accounts and maps them based on naming patterns with parent-child inheritance.
+
 ## Common Commands Reference
 
 | Command | Purpose | Example |
@@ -227,16 +257,12 @@ This lists all unmapped accounts with their GUIDs.
 | `repair-dates` | Fix empty date fields | `gcgaap repair-dates --file mybook.gnucash` |
 | `entity-infer` | Auto-detect entities | `gcgaap entity-infer --file mybook.gnucash --output entity-map.json` |
 | `entity-scan` | Find unmapped accounts | `gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json` |
+| `entity-remap` | Regenerate entity mapping | `gcgaap entity-remap --file mybook.gnucash --output entity-map.json` |
 | `violations` | Data quality report | `gcgaap violations --file mybook.gnucash --as-of 2026-12-31` |
 | `validate` | Validate book integrity | `gcgaap validate --file mybook.gnucash --entity-map entity-map.json --strict` |
+| `balance-check` | Quick balance check | `gcgaap balance-check --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
 | `balance-sheet` | Generate balance sheet | `gcgaap balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
-| `snapshot` | Capture database state | `gcgaap snapshot --file mybook.gnucash` |
-| `diff-snapshots` | Compare two snapshots | `gcgaap diff-snapshots before.json after.json` |
-
-## Troubleshooting
-
-### "Couldn't parse datetime string: ''"
-
+| `cross-entity` | Analyze cross-entity transactions | `gcgaap cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
 This error means your GnuCash database has empty date fields. Fix it with:
 
 ```bash
@@ -284,7 +310,7 @@ Included in this repository is **Columbo** ([COLUMBO_README.md](COLUMBO_README.m
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Non-Commercial Open Source License - see [LICENSE](LICENSE) file for details.
 
 ## Additional Documentation
 

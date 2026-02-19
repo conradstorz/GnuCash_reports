@@ -867,7 +867,26 @@ def violations(book_file, entity_map_file, as_of, tolerance):
     default=None,
     help="Analysis date in YYYY-MM-DD format (default: all transactions)."
 )
-def cross_entity(book_file, entity_map_file, as_of):
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    help="Show detailed transaction information for each cross-entity transaction."
+)
+@click.option(
+    "--limit",
+    "-l",
+    type=int,
+    default=None,
+    help="Limit number of detailed transactions shown (default: show all)."
+)
+@click.option(
+    "--simple",
+    "-s",
+    is_flag=True,
+    help="Show unbalanced transactions in simple format: one line per split with account, date, amount."
+)
+def cross_entity(book_file, entity_map_file, as_of, verbose, limit, simple):
     """
     Analyze cross-entity transactions and identify imbalances.
     
@@ -881,13 +900,29 @@ def cross_entity(book_file, entity_map_file, as_of):
     
     The report shows:
     \b
-    - All cross-entity transactions
+    - All cross-entity transactions (count)
     - Net imbalance for each entity
     - Inter-entity balances (who owes whom)
     - Specific recommendations for creating balancing entries
+    - With --verbose: detailed transaction list with dates, descriptions, and splits
+    - With --simple: simple one-line format with account name, date, and amount
     
     Use this command when your entity balance sheets don't balance due to
     shared accounts or cross-entity payments.
+    
+    Examples:
+    \b
+    # Basic summary
+    gcgaap cross-entity -f book.gnucash
+    
+    # Show first 10 transactions in detail
+    gcgaap cross-entity -f book.gnucash --verbose --limit 10
+    
+    # Show all transactions in detail
+    gcgaap cross-entity -f book.gnucash -v
+    
+    # Show simple one-line format
+    gcgaap cross-entity -f book.gnucash --simple
     """
     logger.info("=== GCGAAP Cross-Entity Transaction Analysis ===")
     
@@ -917,9 +952,22 @@ def cross_entity(book_file, entity_map_file, as_of):
         click.echo(summary)
         click.echo()
         
-        # Display recommendations
-        recommendations = analysis.format_recommendations()
-        click.echo(recommendations)
+        # Display transactions in requested format
+        if simple:
+            # Simple one-line format
+            simple_list = analysis.format_simple_list()
+            click.echo(simple_list)
+            click.echo()
+        elif verbose:
+            # Detailed multi-line format
+            details = analysis.format_transaction_details(limit=limit)
+            click.echo(details)
+            click.echo()
+        
+        # Display recommendations (skip if simple format)
+        if not simple:
+            recommendations = analysis.format_recommendations()
+            click.echo(recommendations)
         
         # Exit with appropriate code
         if analysis.get_entities_with_imbalances():

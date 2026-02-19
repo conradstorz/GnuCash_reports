@@ -25,6 +25,15 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
+class SplitInfo:
+    """Information about a split in a cross-entity transaction."""
+    account_name: str
+    account_guid: str
+    entity: str
+    value: Decimal
+
+
+@dataclass
 class CrossEntityTransaction:
     """
     Represents a transaction with splits across multiple entities.
@@ -35,6 +44,7 @@ class CrossEntityTransaction:
         entity_amounts: Mapping of entity key to net amount (negative = credit, positive = debit).
         description: Transaction description.
         post_date: Transaction date.
+        splits_info: Detailed information about each split.
     """
     
     transaction: GCTransaction
@@ -42,6 +52,7 @@ class CrossEntityTransaction:
     entity_amounts: dict[str, Decimal]
     description: str
     post_date: date
+    splits_info: list[SplitInfo] = field(default_factory=list)
     
     def is_balanced_per_entity(self, tolerance: float = 0.01) -> bool:
         """Check if all entity amounts sum to zero."""
@@ -56,6 +67,16 @@ class CrossEntityTransaction:
         A negative value means the entity has a credit imbalance (is owed by other entities).
         """
         return self.entity_amounts.copy()
+    
+    def get_max_entity_imbalance(self) -> Decimal:
+        """Get the maximum absolute imbalance among all entities in this transaction."""
+        if not self.entity_amounts:
+            return Decimal(0)
+        return max(abs(amount) for amount in self.entity_amounts.values())
+    
+    def has_significant_imbalance(self, tolerance: float = 0.01) -> bool:
+        """Check if any entity has a significant non-zero balance."""
+        return float(self.get_max_entity_imbalance()) > tolerance
 
 
 @dataclass
@@ -104,6 +125,161 @@ class CrossEntityAnalysis:
             if abs(float(amount)) > tolerance
         ]
     
+    def format_transaction_details(self, limit: Optional[int] = None, tolerance: float = 0.01) -> str:
+        """
+        Format detailed information about cross-entity transactions.
+        
+        Args:
+            limit: Optional limit on number of transactions to show.
+            tolerance: Tolerance for filtering out balanced transactions.
+            
+        Returns:
+            Formatted string with transaction details.
+        """
+        lines = []
+        lines.append("=" * 80)
+        lines.append("DETAILED CROSS-ENTITY TRANSACTIONS")
+        lines.append("=" * 80)
+        lines.append("")
+        
+        if not self.cross_entity_transactions:
+            lines.append("No cross-entity transactions found.")
+            lines.append("")
+            return "\n".join(lines)
+        
+        # Filter out balanced transactions (where all entities have ~0 net)
+        unbalanced_txns = [
+            txn for txn in self.cross_entity_transactions
+            if txn.has_significant_imbalance(tolerance)
+        ]
+        
+        if not unbalanced_txns:
+            lines.append("All cross-entity transactions are balanced.")
+            lines.append(f"(Filtered out {len(self.cross_entity_transactions)} balanced cross-entity transactions)")
+            lines.append("")
+            return "\n".join(lines)
+        
+        # Sort by largest imbalance first, then by date
+        sorted_txns = sorted(
+            unbalanced_txns,
+            key=lambda x: (x.get_max_entity_imbalance(), x.post_date),
+            reverse=True
+        )
+        
+        # Apply limit if specified
+        txns_to_show = sorted_txns[:limit] if limit else sorted_txns
+        
+        balanced_count = len(self.cross_entity_transactions) - len(unbalanced_txns)
+        if balanced_count > 0:
+            lines.append(f"Filtered out {balanced_count} balanced cross-entity transaction(s)")
+            lines.append("")
+        
+        lines.append(f"Showing {len(txns_to_show)} of {len(sorted_txns)} unbalanced cross-entity transactions")
+        lines.append("(Sorted by largest imbalance)")
+        lines.append("")
+        
+        for i, cross_txn in enumerate(txns_to_show, 1):
+            max_imbalance = cross_txn.get_max_entity_imbalance()
+            lines.append(f"Transaction #{i} [Max Imbalance: ${max_imbalance:,.2f}]")
+            lines.append(f"Date: {cross_txn.post_date}")
+            lines.append(f"Description: {cross_txn.description}")
+            lines.append(f"GUID: {cross_txn.transaction.guid}")
+            lines.append(f"Entities: {', '.join(sorted(cross_txn.entities_involved))}")
+            lines.append("")
+            
+            # Show net amounts per entity
+            lines.append("Net by Entity:")
+            for entity in sorted(cross_txn.entities_involved):
+                amount = cross_txn.entity_amounts.get(entity, Decimal(0))
+                sign = "+" if amount >= 0 else ""
+                lines.append(f"  {entity:<30} {sign}{amount:>15.2f}")
+            
+            # Show individual splits grouped by entity
+            lines.append("")
+            lines.append("Splits by Account:")
+            for split_info in cross_txn.splits_info:
+                value = split_info.value
+                sign = "+" if value >= 0 else ""
+                lines.append(f"  [{split_info.entity}]")
+                lines.append(f"    {split_info.account_name:<60} {sign}{value:>15.2f}")
+            
+            lines.append("")
+            lines.append("-" * 80)
+            lines.append("")
+        
+        if limit and len(sorted_txns) > limit:
+            lines.append(f"... and {len(sorted_txns) - limit} more transactions")
+            lines.append(f"Use --limit with a higher value to see more, or omit --limit to see all")
+            lines.append("")
+        
+        lines.append("=" * 80)
+        
+        return "\n".join(lines)
+    
+    def format_simple_list(self, tolerance: float = 0.01) -> str:
+        """
+        Format unbalanced transactions as a simple list with one split per line.
+        
+        Args:
+            tolerance: Tolerance for filtering out balanced transactions.
+            
+        Returns:
+            Formatted string with account name, date, and amount per line.
+        """
+        lines = []
+        lines.append("=" * 80)
+        lines.append("UNBALANCED CROSS-ENTITY TRANSACTIONS - SIMPLE LIST")
+        lines.append("=" * 80)
+        lines.append("")
+        
+        if not self.cross_entity_transactions:
+            lines.append("No cross-entity transactions found.")
+            return "\n".join(lines)
+        
+        # Filter out balanced transactions
+        unbalanced_txns = [
+            txn for txn in self.cross_entity_transactions
+            if txn.has_significant_imbalance(tolerance)
+        ]
+        
+        if not unbalanced_txns:
+            lines.append("All cross-entity transactions are balanced.")
+            return "\n".join(lines)
+        
+        # Filter to only 2-split transactions and sort by Account 2 name
+        two_split_txns = [txn for txn in unbalanced_txns if len(txn.splits_info) == 2]
+        sorted_txns = sorted(two_split_txns, key=lambda x: x.splits_info[1].account_name.split(':')[-1])
+        
+        lines.append(f"{'Date':<12} {'Account 1':<45} {'Amount 1':>12}   {'Account 2':<45} {'Amount 2':>12}")
+        lines.append("-" * 130)
+        
+        # Output each transaction on a single line with both accounts
+        for cross_txn in sorted_txns:
+            split1 = cross_txn.splits_info[0]
+            split2 = cross_txn.splits_info[1]
+            
+            # Extract leaf account names
+            account1 = split1.account_name.split(':')[-1]
+            account2 = split2.account_name.split(':')[-1]
+            
+            lines.append(
+                f"{cross_txn.post_date} "
+                f"{account1:<45} "
+                f"{split1.value:>12.2f}   "
+                f"{account2:<45} "
+                f"{split2.value:>12.2f}"
+            )
+        
+        lines.append("-" * 130)
+        lines.append(f"Total 2-split unbalanced transactions: {len(sorted_txns)}")
+        
+        multi_split_count = len(unbalanced_txns) - len(two_split_txns)
+        if multi_split_count > 0:
+            lines.append(f"(Excluded {multi_split_count} transactions with more than 2 splits)")
+        lines.append("")
+        
+        return "\n".join(lines)
+    
     def format_summary(self) -> str:
         """Format a human-readable summary of the analysis."""
         lines = []
@@ -116,7 +292,16 @@ class CrossEntityAnalysis:
             lines.append(f"Analysis Date: {self.as_of_date}")
             lines.append("")
         
+        # Count unbalanced transactions
+        unbalanced_count = sum(
+            1 for txn in self.cross_entity_transactions
+            if txn.has_significant_imbalance()
+        )
+        balanced_count = len(self.cross_entity_transactions) - unbalanced_count
+        
         lines.append(f"Total Cross-Entity Transactions: {self.get_total_cross_entity_transactions()}")
+        lines.append(f"  - Unbalanced (problematic): {unbalanced_count}")
+        lines.append(f"  - Balanced (proper inter-entity): {balanced_count}")
         lines.append("")
         
         # Entity imbalances
@@ -273,6 +458,7 @@ def analyze_cross_entity_transactions(
         # Determine which entities are involved
         entity_amounts: dict[str, Decimal] = defaultdict(Decimal)
         entities_in_txn = set()
+        splits_info_list = []
         
         for split in txn.splits:
             # Get entity for this split's account
@@ -280,12 +466,21 @@ def analyze_cross_entity_transactions(
             
             # Look up account info and entity
             if account_guid in account_lookup:
-                _, entity_key = account_lookup[account_guid]
+                account_name, entity_key = account_lookup[account_guid]
                 
                 if entity_key:
                     entities_in_txn.add(entity_key)
                     # Track net amount for this entity (value is already in correct sign)
-                    entity_amounts[entity_key] += Decimal(str(split.value))
+                    split_value = Decimal(str(split.value))
+                    entity_amounts[entity_key] += split_value
+                    
+                    # Store split details
+                    splits_info_list.append(SplitInfo(
+                        account_name=account_name,
+                        account_guid=account_guid,
+                        entity=entity_key,
+                        value=split_value
+                    ))
         
         # If transaction spans multiple entities, it's a cross-entity transaction
         if len(entities_in_txn) > 1:
@@ -294,7 +489,8 @@ def analyze_cross_entity_transactions(
                 entities_involved=entities_in_txn,
                 entity_amounts=entity_amounts,
                 description=txn.description,
-                post_date=parse_date(txn.post_date) or date.today()
+                post_date=parse_date(txn.post_date) or date.today(),
+                splits_info=splits_info_list
             )
             
             analysis.cross_entity_transactions.append(cross_txn)

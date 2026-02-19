@@ -18,39 +18,43 @@ To properly track shared credit card transactions, you need to use **inter-entit
 
 Create these equity accounts in your GnuCash book:
 
-#### For Each Business Entity:
+#### For Each Entity (Including Personal):
 ```
-Equity:Due to Personal      (tracks money owed to personal entity)
-Equity:Due from Personal    (tracks money owed by personal entity)
-```
-
-#### For Personal Entity:
-```
-Equity:Due from [Business Name]  (for each business - tracks money owed by that business)
-Equity:Due to [Business Name]    (for each business - tracks money owed to that business)
+Equity:Inter Entity xfers:[Entity Name]:Money In ([Entity Name])   (tracks money owed TO this entity by others)
+Equity:Inter Entity xfers:[Entity Name]:Money Out ([Entity Name])  (tracks money owed BY this entity to others)
 ```
 
 **Example Structure:**
 ```
-Equity
-  ├── Due to Personal
-  ├── Due from Personal
-  ├── Due from Storz Amusements
-  ├── Due to Storz Amusements
-  ├── Due from Storz Cash
-  └── Due to Storz Cash
+Equity:Inter Entity xfers
+  ├── Personal
+  │   ├── Money In (Personal)    (others owe money to Personal)
+  │   └── Money Out (Personal)   (Personal owes money to others)
+  ├── Storz Amusements
+  │   ├── Money In (Storz Amusements)
+  │   └── Money Out (Storz Amusements)
+  └── Storz Cash
+      ├── Money In (Storz Cash)
+      └── Money Out (Storz Cash)
 ```
+
+**Interpretation:**
+- **Money Out** = This entity owes money (like a liability)
+- **Money In** = This entity is owed money (like a receivable)
 
 ### Step 2: Map Inter-Entity Accounts to Entities
 
 Update your `entity_account_map.json`:
 
-- "Due to Personal" accounts → Map to the **business entity**
-- "Due from [Business]" accounts → Map to **personal entity**
-- "Due from Personal" accounts → Map to the **business entity**
-- "Due to [Business]" accounts → Map to **personal entity**
+- "Money In (Personal)" → Map to **personal** entity
+- "Money Out (Personal)" → Map to **personal** entity
+- "Money In (Storz Amusements)" → Map to **storz_amusements** entity
+- "Money Out (Storz Amusements)" → Map to **storz_amusements** entity
+- (Continue for all entities...)
 
-**Why:** These accounts act as bridges between entities, tracking the flow of value.
+**Principle:** Each entity owns its own "Money In" and "Money Out" accounts. This makes entity mapping straightforward and intuitive.
+
+**Why:** These accounts act as bridges between entities, tracking inter-entity obligations (who owes whom).
 
 ### Step 3: Recording Transactions
 
@@ -65,31 +69,48 @@ Description: Office supplies for Storz Amusements
 ```
 ❌ This splits the transaction across entities, causing imbalance.
 
-**Correct Method - Use Inter-Entity Accounts:**
+**✅ RECOMMENDED: Single Transaction with Balancing Splits**
 
-**Transaction 1: Record the business expense**
+Record all splits in ONE transaction to keep related entries together:
+
+```
+Date: 2026-02-10
+Description: Office supplies for Storz Amusements
+  Expenses:Storz Amusements:Office Supplies        $100.00  [→ Business entity]
+  Equity:Money Out (Storz Amusements)             -$100.00  [→ Business entity]
+  Equity:Money In (Personal)                       $100.00  [→ Personal entity]
+  Liabilities:Personal:AmEx Card                  -$100.00  [→ Personal entity]
+```
+
+**Why this works:**
+- Transaction still balances to $0 (required by GnuCash)
+- Business entity sees: $100 expense, $100 going out (owed to Personal)
+- Personal entity sees: $100 coming in (owed by Business), $100 credit card liability
+- All related information stays together in one transaction
+- **Preserves your import and reconciliation workflow** - credit card stays as single account
+- Easy to see which expense relates to which balancing entry
+
+**Alternative: Separate Transactions (More Work)**
+
+You can also split this into two separate transactions:
+
+**Transaction 1:**
 ```
 Date: 2026-02-10
 Description: Office supplies for Storz Amusements
   Expenses:Storz Amusements:Office Supplies    $100.00  [→ Business entity]
-  Equity:Due to Personal                      -$100.00  [→ Business entity]
+  Equity:Money Out (Storz Amusements)         -$100.00  [→ Business entity]
 ```
-✓ This transaction stays within the business entity.
 
-**Transaction 2: Record personal credit card payment**
+**Transaction 2:**
 ```
 Date: 2026-02-10
 Description: Credit card charge - office supplies
-  Equity:Due from Storz Amusements             $100.00  [→ Personal entity]
+  Equity:Money In (Personal)                   $100.00  [→ Personal entity]
   Liabilities:Personal:AmEx Card              -$100.00  [→ Personal entity]
 ```
-✓ This transaction stays within the personal entity.
 
-**Net result:** 
-- Business shows $100 expense and $100 owed to Personal
-- Personal shows $100 credit card liability and $100 owed from Business
-- Both entities balance correctly
-- The "Due to/from" accounts track the inter-entity debt
+This achieves the same result but requires more data entry and splits related information across multiple transactions.
 
 #### Scenario B: Personal Expense Paid with Personal Credit Card
 
@@ -100,27 +121,46 @@ Description: Groceries
   Expenses:Personal:Groceries                  $150.00  [→ Personal entity]
   Liabilities:Personal:AmEx Card              -$150.00  [→ Personal entity]
 ```
-✓ Transaction stays within personal entity - no problem.
+✓ Transaction stays within personal entity - no inter-entity balancing required.
 
 #### Scenario C: Settling Inter-Entity Balances
 
-When the business pays back the personal entity:
+When the business pays back the personal entity, record the transfer:
 
+**Single transaction with all splits:**
 ```
 Date: 2026-02-15
 Description: Transfer to settle inter-entity balance
-  Assets:Storz Amusements:Checking Account   -$1,000.00  [→ Business entity]
-  Equity:Due to Personal                      $1,000.00  [→ Business entity]
-
-  Assets:Personal:Checking Account            $1,000.00  [→ Personal entity]
-  Equity:Due from Storz Amusements           -$1,000.00  [→ Personal entity]
+  Assets:Storz Amusements:Checking Account     -$1,000.00  [→ Business entity]
+  Equity:Money Out (Storz Amusements)           $1,000.00  [→ Business entity]
+  Equity:Money In (Personal)                   -$1,000.00  [→ Personal entity]
+  Assets:Personal:Checking Account              $1,000.00  [→ Personal entity]
 ```
 
-This is recorded as two separate transactions in GnuCash, but represents the same physical transfer.
+This reduces the inter-entity debt by $1,000.
 
-## Alternative Approach: Split Credit Card Accounts
+## Approach Comparison
 
-Instead of using inter-entity equity accounts, you can create separate sub-accounts for each credit card:
+| Factor | Single Account + Balancing Splits | Split Sub-Accounts |
+|--------|-----------------------------------|--------------------|
+| **Credit Card Import** | ✅ Works normally - import to single account | ❌ Must manually route each import to correct sub-account |
+| **Monthly Reconciliation** | ✅ One account vs one statement | ❌ Reconcile 3+ sub-accounts against one unified statement |
+| **Transaction Entry** | ⚠️ Requires 4 splits per cross-entity charge | ✅ Only 2 splits needed |
+| **Payment Processing** | ✅ Pay from personal checking normally | ❌ Complex - must allocate payment across sub-accounts |
+| **Statement Matching** | ✅ Matches bank's unified view | ❌ Must mentally split unified statement |
+| **Data Entry Complexity** | ⚠️ Must remember balancing entries | ✅ Direct entry to entity-specific account |
+| **Historical Migration** | ✅ Only need balancing entries for past | ❌ Must re-categorize all historical transactions |
+| **Carrying Balances** | ✅ Interest/fees recorded normally | ❌ Must allocate interest/fees across sub-accounts |
+| **GnuCash Enforcement** | ❌ Won't warn if you forget balancing | ✅ Account structure enforces split |
+| **GCGAAP Detection** | ✅ Reports missing balancing entries | ✅ No detection needed |
+
+**Recommendation:** Use the **single account with balancing splits** approach. The extra data entry overhead is worth it to preserve clean import/reconcile workflow.
+
+---
+
+## ❌ Not Recommended: Split Credit Card Sub-Accounts
+
+Some guides recommend splitting your credit card into entity-specific sub-accounts:
 
 ```
 Liabilities:Credit Cards:American Express
@@ -129,24 +169,29 @@ Liabilities:Credit Cards:American Express
   └── AmEx - Storz Cash           [→ Map to Storz Cash entity]
 ```
 
-Then record transactions in the appropriate sub-account:
+**Why This Doesn't Work Well:**
 
-```
-Date: 2026-02-10
-Description: Office supplies
-  Expenses:Storz Amusements:Office Supplies            $100.00  [→ Business entity]
-  Liabilities:Credit Cards:AmEx - Storz Amusements    -$100.00  [→ Business entity]
-```
+1. **Import Nightmare**: Credit card downloads (CSV/OFX) come as a single file with all charges mixed together. You'd need to:
+   - Import all transactions to a temporary account
+   - Manually categorize each one to the correct sub-account
+   - Completely breaks automatic import workflow
 
-**Pros:**
-- Simpler to understand
-- Fewer transaction entries
-- Each charge goes directly to the correct entity
+2. **Reconciliation Hell**: The bank sends ONE statement with ONE balance showing all transactions mixed together. You'd need to:
+   - Reconcile 3+ separate GnuCash sub-accounts against a single unified statement
+   - Manually check that sub-account balances sum to the statement total
+   - Track which statement lines correspond to which sub-account
 
-**Cons:**
-- Doesn't match the actual credit card bill structure
-- When you pay the credit card, you need to split the payment across multiple accounts
-- Less flexible if you need to move charges between entities later
+3. **Payment Complications**: When you pay the credit card bill from your personal checking account:
+   - Which sub-account gets reduced?
+   - Do you split the payment proportionally across all sub-accounts?
+   - Does the business reimburse you? How is that recorded?
+   - The payment transaction becomes extremely complex
+
+4. **Statement Mismatch**: Paper/PDF statements don't show entity breakdowns, so you're constantly cross-referencing between the bank's unified view and your split view.
+
+5. **Migration Pain**: Converting existing data requires re-categorizing potentially thousands of historical transactions.
+
+**Verdict:** This approach trades workflow simplicity for theoretical organization, but creates massive practical problems. Stick with the single account + balancing entries method.
 
 ## Using the GCGAAP Tools
 
@@ -193,23 +238,27 @@ The tool will provide specific recommendations like:
 ```
 storz_amusements owes personal: $2,345.67
   Transaction:
-  - Debit:  Equity:Due to personal (in storz_amusements) $2,345.67
-  - Credit: Equity:Due from storz_amusements (in personal) $2,345.67
+  - Debit:  Equity:Money Out (Storz Amusements) $2,345.67  [→ Business entity]
+  - Credit: Equity:Money In (Personal)          $2,345.67  [→ Personal entity]
 ```
 
-Create this transaction in GnuCash to balance the entities.
+Create this balancing transaction in GnuCash.
 
 ## Best Practices
 
-1. **Decide on One Approach**: Choose either inter-entity accounts OR split credit card accounts, but be consistent.
+1. **Use Single Account with Balancing Splits**: Keep your credit card as a single unified account for clean import/reconcile workflow.
 
-2. **Regular Reconciliation**: Run `gcgaap cross-entity` monthly to identify and fix imbalances.
+2. **Add Balancing Splits Immediately**: When entering a cross-entity transaction, add the balancing "Money In/Out" splits right away. Don't wait!
 
-3. **Document Your Method**: Note in your GnuCash file which approach you're using for future reference.
+3. **Create Transaction Templates**: In GnuCash, create templates for common cross-entity transactions (e.g., "Business Expense on Personal Card") to speed up data entry.
 
-4. **Use Automation**: If you frequently split transactions, consider using GnuCash's transaction templates.
+4. **Regular Validation**: Run `gcgaap cross-entity` monthly to catch any missed balancing entries.
 
-5. **Review Before Reports**: Always run `gcgaap violations` before generating financial reports to ensure data integrity.
+5. **Fix Imbalances Promptly**: If the report shows imbalances, create the recommended balancing transactions immediately.
+
+6. **Review Before Reports**: Always run `gcgaap violations` before generating financial reports to ensure data integrity.
+
+7. **Note in Descriptions**: Include entity name in transaction descriptions (e.g., "Office supplies for Storz Amusements") to make reviewing easier.
 
 ## Troubleshooting
 
@@ -228,11 +277,15 @@ Check for:
 
 ### Q: Do I need to create balancing entries for every single transaction?
 
-A: Yes, if you're using the inter-entity account method. Each time you charge a business expense to a personal credit card, you need two entries:
-1. The expense in the business entity with credit to "Due to Personal"
-2. The matching entry in personal entity
+A: Yes, every cross-entity transaction needs balancing splits. But you can add them all in the SAME transaction:
+```
+Expenses:Business:Office Supplies         $100.00  [→ Business]
+Equity:Money Out (Business)              -$100.00  [→ Business]
+Equity:Money In (Personal)                $100.00  [→ Personal]
+Liabilities:Personal:AmEx                -$100.00  [→ Personal]
+```
 
-Alternatively, use the split credit card account method for simpler entry.
+This keeps everything together and maintains your clean import/reconcile workflow.
 
 ### Q: Can I fix past transactions all at once?
 

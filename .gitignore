@@ -51,6 +51,9 @@ entity-map-*.json
 snapshot_*.json
 validation_report*
 diff_results.json
+cross_entity*.txt
+cross_entity*.json
+entity_account_map.json
 
 # Deprecated diagnostic scripts
 detailed_diagnose.py
