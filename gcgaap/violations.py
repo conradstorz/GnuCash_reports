@@ -198,6 +198,9 @@ def generate_violations_report(
     # Check 4: Check for imbalance/orphan accounts with non-zero balances
     _check_imbalance_accounts(book, as_of_date, config, report)
     
+    # Check 5: Check for placeholder accounts with transactions
+    _check_placeholder_accounts(book, as_of_date, report)
+    
     logger.info(
         f"Violations report complete: {report.critical_count} critical, "
         f"{report.error_count} errors, {report.warning_count} warnings"
@@ -437,6 +440,65 @@ def _check_imbalance_accounts(
                     balance=balance,
                     account_type=account.type
                 )
+
+
+def _check_placeholder_accounts(
+    book: GnuCashBook,
+    as_of_date: date,
+    report: ViolationsReport
+) -> None:
+    """
+    Check for placeholder accounts with transactions.
+    
+    Placeholder accounts should be structural only and contain no transactions.
+    By definition, placeholder accounts are not allowed to have transactions.
+    
+    Args:
+        book: Opened GnuCashBook.
+        as_of_date: Date for balance calculations.
+        report: ViolationsReport to append to.
+    """
+    logger.debug("Checking for placeholder accounts with transactions")
+    
+    placeholder_violation_count = 0
+    
+    for account in book.iter_accounts():
+        if account.is_placeholder:
+            # Check if this account has any transactions by examining its balance
+            # and checking if any splits reference this account
+            has_transactions = False
+            transaction_count = 0
+            
+            # Check all transactions for splits that reference this placeholder account
+            for transaction in book.iter_transactions():
+                for split in transaction.splits:
+                    if split.account_guid == account.guid:
+                        has_transactions = True
+                        transaction_count += 1
+                        break
+                if has_transactions:
+                    break
+            
+            if has_transactions:
+                placeholder_violation_count += 1
+                
+                report.add_violation(
+                    category="PLACEHOLDER_HAS_TRANSACTIONS",
+                    severity="error",
+                    message=(
+                        f"Placeholder account contains transactions "
+                        f"({transaction_count} transaction(s) found). "
+                        f"Placeholder accounts must not contain any transactions."
+                    ),
+                    item_id=account.guid,
+                    item_name=account.full_name,
+                    account_type=account.type,
+                    transaction_count=transaction_count
+                )
+    
+    logger.info(
+        f"Checked placeholder accounts: {placeholder_violation_count} violation(s) found"
+    )
 
 
 def format_violations_report(report: ViolationsReport) -> str:

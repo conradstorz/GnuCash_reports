@@ -20,6 +20,10 @@ from piecash import open_book
 
 # Entity definitions with their matching patterns
 ENTITIES = {
+    "placeholder_only_acct": {
+        "label": "Placeholder Only Account",
+        "aliases": [],  # Special entity for placeholder accounts
+    },
     "unassigned": {
         "label": "Unassigned",
         "aliases": [],  # Default entity - no patterns
@@ -53,7 +57,7 @@ def build_entity_patterns() -> Dict[str, List[re.Pattern]]:
     patterns = {}
     
     for entity_key, entity_info in ENTITIES.items():
-        if entity_key == "unassigned":
+        if entity_key in ("unassigned", "placeholder_only_acct"):
             patterns[entity_key] = []
             continue
             
@@ -81,7 +85,7 @@ def match_entity(account_name: str, entity_patterns: Dict[str, List[re.Pattern]]
         Entity key if matched, None otherwise.
     """
     for entity_key, patterns in entity_patterns.items():
-        if entity_key == "unassigned":
+        if entity_key in ("unassigned", "placeholder_only_acct"):
             continue
             
         for pattern in patterns:
@@ -119,6 +123,7 @@ def build_account_tree(book):
             "parent_guid": account.parent.guid if account.parent and account.parent.type != "ROOT" else None,
             "children_guids": [],
             "entity": None,  # Will be assigned later
+            "is_placeholder": bool(account.placeholder),  # Track placeholder status
         }
         
         accounts_dict[account.guid] = account_info
@@ -157,8 +162,12 @@ def assign_entities_with_inheritance(
         """Recursively assign entity to account and its children."""
         account = accounts_dict[account_guid]
         
+        # Check if this is a placeholder account
+        if account.get("is_placeholder", False):
+            account["entity"] = "placeholder_only_acct"
+            entity_to_pass = None  # Don't inherit placeholder entity
         # If we have an inherited entity, use it
-        if inherited_entity:
+        elif inherited_entity:
             account["entity"] = inherited_entity
             entity_to_pass = inherited_entity
         else:

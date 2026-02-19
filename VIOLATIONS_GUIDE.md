@@ -146,7 +146,32 @@ account_type: BANK
 - Correct the transaction properly
 - The Imbalance account should zero out
 
-#### 5. UNKNOWN_ACCOUNT_TYPE (Warning)
+#### 5. PLACEHOLDER_HAS_TRANSACTIONS (Error)
+
+**What it means**: A placeholder account contains one or more transactions
+
+**Example**:
+```
+[ERROR] Placeholder account contains transactions (2 transaction(s) found).
+        Placeholder accounts must not contain any transactions.
+Item: Assets root:Current Assets root
+ID: abc123...
+account_type: ASSET
+transaction_count: 2
+```
+
+**Why it matters**: Placeholder accounts (also called "structural accounts") are organizational containers in GnuCash. They are marked as placeholders specifically to prevent transactions from being posted directly to them. Having transactions in a placeholder account violates GnuCash's design principles.
+
+**How to fix**:
+- Open GnuCash and locate the placeholder account
+- Review the Account Properties to verify it's marked as a placeholder
+- Find the transactions that were incorrectly posted to this account
+- Move (reclassify) those transactions to proper child accounts
+- Placeholder accounts should only contain sub-accounts, never transactions
+
+**Note**: The entity mapper automatically labels placeholder accounts as `placeholder_only_acct` entity, distinguishing them from regular unmapped accounts.
+
+#### 6. UNKNOWN_ACCOUNT_TYPE (Warning)
 
 **What it means**: An account has an unrecognized type
 

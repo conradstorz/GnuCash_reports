@@ -5,6 +5,22 @@ All notable changes to GCGAAP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Placeholder Account Validation**
+  - Placeholder accounts now labeled as `placeholder_only_acct` entity (not `unassigned`)
+  - New validation check verifies placeholder accounts contain no transactions
+  - Added `is_placeholder` field to `GCAccount` dataclass
+  - Added `structural` entity type for placeholder-only accounts
+  - Placeholder accounts reported as violations only if they contain transactions
+  - Entity mapper automatically detects and labels placeholder accounts
+
+### Changed
+- Entity mapper now properly identifies placeholder accounts from GnuCash database
+- EntityDefinition now supports three entity types: `individual`, `business`, and `structural`
+- Validation reports now include placeholder account transaction checks
+
 ## [0.2.0] - 2026-02-08
 
 ### Added

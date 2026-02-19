@@ -22,19 +22,19 @@ class EntityDefinition:
     Attributes:
         key: Unique identifier for this entity (e.g., "personal", "alpha_llc").
         label: Human-readable display name.
-        type: Entity type - "individual" or "business".
+        type: Entity type - "individual", "business", or "structural".
     """
     
     key: str
     label: str
-    type: str  # "individual" or "business"
+    type: str  # "individual", "business", or "structural"
     
     def __post_init__(self):
         """Validate entity type."""
-        if self.type not in ("individual", "business"):
+        if self.type not in ("individual", "business", "structural"):
             logger.warning(
                 f"Entity '{self.key}' has unexpected type '{self.type}'. "
-                f"Expected 'individual' or 'business'."
+                f"Expected 'individual', 'business', or 'structural'."
             )
 
 
@@ -100,7 +100,12 @@ class EntityMap:
         for entity_key in entities_data.keys():
             label = entity_labels.get(entity_key, entity_key.replace("_", " ").title())
             # Determine type based on entity key naming convention
-            entity_type = "individual" if entity_key in ("personal", "unassigned") else "business"
+            if entity_key in ("personal", "unassigned"):
+                entity_type = "individual"
+            elif entity_key == "placeholder_only_acct":
+                entity_type = "structural"
+            else:
+                entity_type = "business"
             
             entities[entity_key] = EntityDefinition(
                 key=entity_key,

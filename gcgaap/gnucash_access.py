@@ -29,6 +29,7 @@ class GCAccount:
         type: GnuCash account type (e.g., "ASSET", "LIABILITY", "EQUITY").
         commodity_symbol: Currency code or commodity ticker (e.g., "USD", "AAPL").
         parent_guid: GUID of parent account, if any.
+        is_placeholder: Whether this account is a placeholder (structure-only) account.
     """
     
     guid: str
@@ -36,6 +37,7 @@ class GCAccount:
     type: str
     commodity_symbol: str
     parent_guid: Optional[str] = None
+    is_placeholder: bool = False
     
     def is_imbalance_account(self) -> bool:
         """
@@ -214,12 +216,16 @@ class GnuCashBook:
             if account.parent and account.parent.guid:
                 parent_guid = str(account.parent.guid)
             
+            # Get placeholder status
+            is_placeholder = bool(getattr(account, 'placeholder', False))
+            
             yield GCAccount(
                 guid=str(account.guid),
                 full_name=full_name,
                 type=account.type,
                 commodity_symbol=account.commodity.mnemonic,
-                parent_guid=parent_guid
+                parent_guid=parent_guid,
+                is_placeholder=is_placeholder
             )
     
     def iter_transactions(self) -> Iterable[GCTransaction]:
