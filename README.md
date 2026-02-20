@@ -51,13 +51,13 @@ pip install -e .
 If you're experiencing errors reading your GnuCash file, check for common issues:
 
 ```bash
-gcgaap repair-dates --file mybook.gnucash --diagnose-only
+gcgaap db repair-dates --file mybook.gnucash --diagnose-only
 ```
 
 If issues are found, repair them:
 
 ```bash
-gcgaap repair-dates --file mybook.gnucash
+gcgaap db repair-dates --file mybook.gnucash
 ```
 
 This creates a backup before making any changes.
@@ -67,7 +67,7 @@ This creates a backup before making any changes.
 Let GCGAAP analyze your accounts and suggest entity mappings:
 
 ```bash
-gcgaap entity-infer --file mybook.gnucash --output entity-map.json
+gcgaap entity infer --file mybook.gnucash --output entity-map.json
 ```
 
 Review and edit `entity-map.json` to refine the mappings.
@@ -75,7 +75,7 @@ Review and edit `entity-map.json` to refine the mappings.
 **Step 3: Scan for unmapped accounts and verify balancing accounts**
 
 ```bash
-gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json
+gcgaap entity scan --file mybook.gnucash --entity-map entity-map.json
 ```
 
 This command shows:
@@ -90,7 +90,7 @@ Cross-entity balancing accounts (like "Equity:Cross-Entity Balancing" or "Equity
 Run a comprehensive violations report:
 
 ```bash
-gcgaap violations --file mybook.gnucash --as-of 2026-12-31
+gcgaap db violations --file mybook.gnucash --as-of 2026-12-31
 ```
 
 This shows all data quality issues that need attention.
@@ -103,46 +103,46 @@ Before generating reports, validate your data:
 
 ```bash
 # Standard validation
-gcgaap validate --file mybook.gnucash --entity-map entity-map.json
+gcgaap db validate --file mybook.gnucash --entity-map entity-map.json
 
 # Strict validation (required for reports)
-gcgaap validate --file mybook.gnucash --entity-map entity-map.json --strict
+gcgaap db validate --file mybook.gnucash --entity-map entity-map.json --strict
 ```
 
 **Generate a Balance Sheet**
 
 ```bash
 # Consolidated balance sheet (all entities combined)
-gcgaap balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31
+gcgaap report balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31
 
 # Entity-specific balance sheet
-gcgaap balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --entity my_business
+gcgaap report balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --entity my_business
 
 # Export as CSV
-gcgaap balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --format csv
+gcgaap report balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --format csv
 
 # Export as JSON
-gcgaap balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --format json
+gcgaap report balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --format json
 ```
 
 **Check entity balances quickly**
 
 ```bash
 # Quick check if all entities balance
-gcgaap balance-check --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31
+gcgaap report balance-check --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31
 ```
 
 **Analyze cross-entity transactions**
 
 ```bash
 # Basic summary of cross-entity transactions
-gcgaap cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31
+gcgaap xact cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31
 
 # Show detailed transaction list
-gcgaap cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --verbose
+gcgaap xact cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --verbose
 
 # Show simplified one-line format
-gcgaap cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --simple
+gcgaap xact cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --simple
 ```
 
 **Track database changes**
@@ -151,15 +151,15 @@ Capture snapshots to see what changed:
 
 ```bash
 # First snapshot (captures "before" state)
-gcgaap snapshot --file mybook.gnucash
+gcgaap db snapshot --file mybook.gnucash -o before.json
 
 # Make changes to your GnuCash file...
 
 # Second snapshot (shows what changed)
-gcgaap snapshot --file mybook.gnucash
+gcgaap db snapshot --file mybook.gnucash -o after.json
 
 # Or compare specific snapshots
-gcgaap diff-snapshots snapshot_before.json snapshot_after.json
+gcgaap db diff-snapshots -b before.json -a after.json
 ```
 
 ## Why Track Multiple Businesses in One Database?
@@ -248,7 +248,7 @@ The `entity-map.json` file has three parts:
 To find account GUIDs for direct mapping:
 
 ```bash
-gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json
+gcgaap entity scan --file mybook.gnucash --entity-map entity-map.json
 ```
 
 This lists all unmapped accounts with their GUIDs.
@@ -258,7 +258,7 @@ This lists all unmapped accounts with their GUIDs.
 To regenerate the entire entity mapping from your GnuCash database:
 
 ```bash
-gcgaap entity-remap --file mybook.gnucash --output entity-map.json
+gcgaap entity remap --file mybook.gnucash --output entity-map.json
 ```
 
 This scans all accounts and maps them based on naming patterns with parent-child inheritance.
@@ -267,15 +267,15 @@ This scans all accounts and maps them based on naming patterns with parent-child
 
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `repair-dates` | Fix empty date fields | `gcgaap repair-dates --file mybook.gnucash` |
-| `entity-infer` | Auto-detect entities | `gcgaap entity-infer --file mybook.gnucash --output entity-map.json` |
-| `entity-scan` | Find unmapped accounts & check balancing accounts | `gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json` |
-| `entity-remap` | Regenerate entity mapping | `gcgaap entity-remap --file mybook.gnucash --output entity-map.json` |
-| `violations` | Data quality report | `gcgaap violations --file mybook.gnucash --as-of 2026-12-31` |
-| `validate` | Validate book integrity | `gcgaap validate --file mybook.gnucash --entity-map entity-map.json --strict` |
-| `balance-check` | Quick balance check | `gcgaap balance-check --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
-| `balance-sheet` | Generate balance sheet | `gcgaap balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
-| `cross-entity` | Analyze cross-entity transactions | `gcgaap cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
+| `db repair-dates` | Fix empty date fields | `gcgaap db repair-dates --file mybook.gnucash` |
+| `entity infer` | Auto-detect entities | `gcgaap entity infer --file mybook.gnucash --output entity-map.json` |
+| `entity scan` | Find unmapped accounts & check balancing accounts | `gcgaap entity scan --file mybook.gnucash --entity-map entity-map.json` |
+| `entity remap` | Regenerate entity mapping | `gcgaap entity remap --file mybook.gnucash --output entity-map.json` |
+| `db violations` | Data quality report | `gcgaap db violations --file mybook.gnucash --as-of 2026-12-31` |
+| `db validate` | Validate book integrity | `gcgaap db validate --file mybook.gnucash --entity-map entity-map.json --strict` |
+| `report balance-check` | Quick balance check | `gcgaap report balance-check --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
+| `report balance-sheet` | Generate balance sheet | `gcgaap report balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
+| `xact cross-entity` | Analyze cross-entity transactions | `gcgaap xact cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
 This error means your GnuCash database has empty date fields. Fix it with:
 
 ```bash
@@ -286,16 +286,16 @@ gcgaap repair-dates --file mybook.gnucash
 
 This means not all accounts are mapped to entities. Options:
 
-1. Run `entity-scan` to find unmapped accounts
+1. Run `entity scan` to find unmapped accounts
 2. Add missing accounts to your entity-map.json
-3. Use `entity-infer` to regenerate entity mappings
+3. Use `entity infer` to regenerate entity mappings
 
 ### "Accounting equation violation"
 
 This indicates data integrity issues. Run the violations report to see details:
 
 ```bash
-gcgaap violations --file mybook.gnucash --as-of 2026-12-31
+gcgaap db violations --file mybook.gnucash --as-of 2026-12-31
 ```
 
 ### Balance Sheet doesn't balance
@@ -312,9 +312,15 @@ If Assets ≠ Liabilities + Equity, check:
 # General help
 gcgaap --help
 
+# Group help
+gcgaap db --help
+gcgaap entity --help
+gcgaap report --help
+gcgaap xact --help
+
 # Command-specific help
-gcgaap balance-sheet --help
-gcgaap repair-dates --help
+gcgaap report balance-sheet --help
+gcgaap db repair-dates --help
 ```
 
 ## Companion Tool: Columbo

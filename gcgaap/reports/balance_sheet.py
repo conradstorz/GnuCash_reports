@@ -492,3 +492,104 @@ def format_as_json(balance_sheet: BalanceSheet) -> str:
     }
     
     return json.dumps(data, indent=2)
+
+
+@dataclass
+class BalanceCheckResult:
+    """
+    Structured result from a single entity balance check.
+
+    Attributes:
+        entity_key: Entity key, or None for consolidated.
+        entity_label: Human-readable entity name.
+        balanced: True if the accounting equation holds.
+        total_assets: Total asset balance.
+        total_liabilities: Total liability balance.
+        total_equity: Total equity balance.
+        imbalance: Imbalance amount (A - L - E).
+        error: Error message if the check failed for a non-imbalance reason.
+    """
+
+    entity_key: Optional[str]
+    entity_label: str
+    balanced: bool
+    total_assets: float = 0.0
+    total_liabilities: float = 0.0
+    total_equity: float = 0.0
+    imbalance: float = 0.0
+    error: Optional[str] = None
+
+
+def check_entity_balance(
+    book,
+    entity_map: EntityMap,
+    as_of_date_str: str,
+    entity_key: Optional[str],
+    config: GCGAAPConfig,
+) -> BalanceCheckResult:
+    """
+    Run a balance sheet for one entity and return a structured result.
+
+    Calls generate_balance_sheet and catches ValueError so callers don't
+    have to parse the error message string.
+
+    Args:
+        book: Open GnuCashBook context.
+        entity_map: Loaded EntityMap.
+        as_of_date_str: Date string in YYYY-MM-DD format.
+        entity_key: Entity key, or None for consolidated.
+        config: GCGAAPConfig instance.
+
+    Returns:
+        BalanceCheckResult with balance data or error information.
+    """
+    if entity_key is None:
+        label = "Consolidated (All Entities)"
+    else:
+        label = entity_map.entities[entity_key].label if entity_key in entity_map.entities else entity_key
+
+    try:
+        bs = generate_balance_sheet(
+            book=book,
+            entity_map=entity_map,
+            as_of_date_str=as_of_date_str,
+            entity_key=entity_key,
+            config=config,
+        )
+        return BalanceCheckResult(
+            entity_key=entity_key,
+            entity_label=label,
+            balanced=True,
+            total_assets=bs.total_assets,
+            total_liabilities=bs.total_liabilities,
+            total_equity=bs.total_equity,
+            imbalance=0.0,
+        )
+    except ValueError as e:
+        error_str = str(e)
+        if "Imbalance (A - L - E):" in error_str:
+            assets = liabilities = equity = imbalance = 0.0
+            for line in error_str.split("\n"):
+                if line.startswith("Assets:"):
+                    assets = float(line.split(":")[1].strip().replace(",", ""))
+                elif line.startswith("Liabilities:"):
+                    liabilities = float(line.split(":")[1].strip().replace(",", ""))
+                elif line.startswith("Equity:"):
+                    equity = float(line.split(":")[1].strip().replace(",", ""))
+                elif line.startswith("Imbalance"):
+                    imbalance = float(line.split(":")[1].strip().replace(",", ""))
+            return BalanceCheckResult(
+                entity_key=entity_key,
+                entity_label=label,
+                balanced=False,
+                total_assets=assets,
+                total_liabilities=liabilities,
+                total_equity=equity,
+                imbalance=imbalance,
+            )
+        return BalanceCheckResult(
+            entity_key=entity_key,
+            entity_label=label,
+            balanced=False,
+            error=error_str,
+        )

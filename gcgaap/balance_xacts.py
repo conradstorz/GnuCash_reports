@@ -436,6 +436,136 @@ def add_balancing_splits(
         return False
 
 
+def run_balance_xacts_workflow(
+    book_file: Path,
+    entity_map: EntityMap,
+    entity_filter: Optional[str],
+    date_from: Optional[date],
+    date_to: Optional[date],
+    dry_run: bool,
+) -> tuple[int, int, Optional[Path]]:
+    """
+    Orchestrate the 6-step balance cross-entity transactions workflow.
+
+    Args:
+        book_file: Path to the GnuCash book file.
+        entity_map: Loaded EntityMap.
+        entity_filter: Optional entity key to filter transactions.
+        date_from: Optional start date filter (already parsed).
+        date_to: Optional end date filter (already parsed).
+        dry_run: If True, preview changes without writing to the database.
+
+    Returns:
+        Tuple of (fixed_count, failed_count, backup_path_or_None).
+    """
+    import click
+
+    # Step 1: Analyze cross-entity transactions
+    click.echo("\n" + "=" * 80)
+    click.echo("STEP 1: Analyzing cross-entity transactions...")
+    click.echo("=" * 80)
+
+    with GnuCashBook(book_file) as book:
+        analysis = analyze_cross_entity_transactions(book, entity_map)
+
+    # Step 2: Identify fixable transactions
+    click.echo("\n" + "=" * 80)
+    click.echo("STEP 2: Identifying fixable 2-split transactions...")
+    click.echo("=" * 80)
+
+    fixable = identify_fixable_transactions(
+        analysis,
+        date_from=date_from,
+        date_to=date_to,
+        entity_filter=entity_filter
+    )
+
+    if not fixable:
+        click.echo("\nNo fixable transactions found!")
+        click.echo("(Looking for 2-split cross-entity transactions with imbalances)")
+        return 0, 0, None
+
+    click.echo(f"\nFound {len(fixable)} fixable transaction(s)")
+
+    # Step 3: Check for required equity accounts
+    click.echo("\n" + "=" * 80)
+    click.echo("STEP 3: Checking for inter-entity equity accounts...")
+    click.echo("=" * 80)
+
+    import piecash
+
+    book_obj = piecash.open_book(str(book_file), readonly=True, do_backup=False)
+    equity_accounts_map = find_equity_accounts(book_obj, entity_map)
+    book_obj.close()
+
+    # Check which entities are involved in fixable transactions
+    involved_entities = set()
+    for txn in fixable:
+        involved_entities.update(txn.entities_involved)
+
+    # Verify all involved entities have equity accounts
+    missing_accounts = []
+    for entity_key in involved_entities:
+        if entity_key not in equity_accounts_map:
+            missing_accounts.append(f"  - {entity_key}: No equity accounts found")
+        elif not equity_accounts_map[entity_key].has_both_accounts():
+            equity = equity_accounts_map[entity_key]
+            if not equity.money_in_account:
+                missing_accounts.append(f"  - {entity_key}: Missing 'Money In' account")
+            if not equity.money_out_account:
+                missing_accounts.append(f"  - {entity_key}: Missing 'Money Out' account")
+
+    if missing_accounts:
+        click.echo("\n[ERROR] Missing required equity accounts:")
+        for msg in missing_accounts:
+            click.echo(msg)
+        click.echo("\nRequired account pattern for each entity:")
+        click.echo("  Equity:<EntityName>:Money In (<OtherEntity>)")
+        click.echo("  Equity:<EntityName>:Money Out (<OtherEntity>)")
+        click.echo("\nCreate these accounts in GnuCash and map them to entities.")
+        return 0, len(fixable), None
+
+    click.echo(f"\n[OK] All {len(involved_entities)} involved entities have required equity accounts")
+
+    # Step 4: Group transactions
+    click.echo("\n" + "=" * 80)
+    click.echo("STEP 4: Grouping similar transactions...")
+    click.echo("=" * 80)
+
+    groups = group_transactions(fixable)
+
+    click.echo(f"\nCreated {len(groups)} group(s) for approval")
+
+    # Step 5: Create backup (unless dry-run)
+    backup_path: Optional[Path] = None
+    if not dry_run:
+        click.echo("\n" + "=" * 80)
+        click.echo("STEP 5: Creating backup...")
+        click.echo("=" * 80)
+
+        backup_path = create_backup(book_file)
+        click.echo(f"\n[OK] Backup created: {backup_path}")
+    else:
+        click.echo("\n[DRY RUN] Skipping backup creation")
+
+    # Step 6: Process groups with user approval
+    click.echo("\n" + "=" * 80)
+    if dry_run:
+        click.echo("STEP 6: Processing groups (DRY RUN - no changes will be made)...")
+    else:
+        click.echo("STEP 6: Processing groups (you will approve each group)...")
+    click.echo("=" * 80)
+
+    fixed_count, failed_count = balance_transaction_groups(
+        book_file,
+        groups,
+        equity_accounts_map,
+        dry_run=dry_run
+    )
+
+    return fixed_count, failed_count, backup_path
+
+
 def balance_transaction_groups(
     book_path: Path,
     groups: list[TransactionGroup],

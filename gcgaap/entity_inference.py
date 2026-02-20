@@ -478,3 +478,80 @@ class EntityInferenceEngine:
         notes.append(f"Confidence levels: {high_conf} high, {med_conf} medium, {low_conf} low")
         
         return notes
+
+
+def build_entity_map_from_suggestions(suggestions: list) -> "EntityMap":
+    """
+    Build an EntityMap from inference suggestions.
+
+    Args:
+        suggestions: List of EntitySuggestion objects.
+
+    Returns:
+        EntityMap with suggested entities and patterns.
+    """
+    from .entity_map import EntityMap, EntityDefinition
+
+    entity_map = EntityMap()
+
+    for suggestion in suggestions:
+        # Add entity definition
+        entity_map.entities[suggestion.key] = EntityDefinition(
+            key=suggestion.key,
+            label=suggestion.label,
+            type=suggestion.type
+        )
+
+        # Add patterns
+        if suggestion.suggested_patterns:
+            entity_map.patterns[suggestion.key] = suggestion.suggested_patterns
+
+    # Recompile patterns
+    entity_map._compile_patterns()
+
+    return entity_map
+
+
+def merge_entity_maps(existing: "EntityMap", suggested: "EntityMap") -> "EntityMap":
+    """
+    Merge suggested entity map with existing one.
+
+    Args:
+        existing: Existing EntityMap.
+        suggested: Suggested EntityMap.
+
+    Returns:
+        Merged EntityMap (keeps existing, adds new suggestions).
+    """
+    from .entity_map import EntityMap
+
+    merged = EntityMap(
+        version=existing.version,
+        entities=dict(existing.entities),
+        account_entities=dict(existing.account_entities),
+        patterns=dict(existing.patterns)
+    )
+
+    # Add new entities (don't overwrite existing)
+    for key, entity in suggested.entities.items():
+        if key not in merged.entities:
+            merged.entities[key] = entity
+            logger.info(f"Added new entity: {key}")
+
+    # Add new patterns (merge lists for existing entities)
+    for key, patterns in suggested.patterns.items():
+        if key in merged.patterns:
+            # Merge pattern lists, avoiding duplicates
+            existing_patterns = set(merged.patterns[key])
+            new_patterns = [p for p in patterns if p not in existing_patterns]
+            if new_patterns:
+                merged.patterns[key].extend(new_patterns)
+                logger.info(f"Added {len(new_patterns)} new pattern(s) for entity: {key}")
+        else:
+            merged.patterns[key] = patterns
+            logger.info(f"Added patterns for new entity: {key}")
+
+    # Recompile patterns
+    merged._compile_patterns()
+
+    return merged
