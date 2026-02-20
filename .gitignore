@@ -52,6 +52,11 @@ entity-map-*.json
 *_dryrun.txt
 balance_xacts_output.txt
 storz_property_dryrun.txt
+*balance*feb*.txt
+*balance_sheet*.txt
+
+# Claude settings (contains local configuration)
+.claude/*.local.json
 
 # Operational data (contains private database information)
 snapshot_*.json
