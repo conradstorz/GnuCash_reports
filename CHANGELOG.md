@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Cross-Entity Balancing Account Detection**
+  - `entity-scan` now checks for cross-entity balancing equity accounts in each entity
+  - Reports which entities have balancing accounts (e.g., "Equity:Cross-Entity Balancing", "Equity:Inter-Entity")
+  - Warns about entities missing balancing accounts
+  - Helps ensure proper setup for tracking inter-entity balances
+  - Pattern matching includes: "cross-entity", "cross entity", "inter-entity", "inter entity", and "balancing"
+
 - **Placeholder Account Validation**
   - Placeholder accounts now labeled as `placeholder_only_acct` entity (not `unassigned`)
   - New validation check verifies placeholder accounts contain no transactions

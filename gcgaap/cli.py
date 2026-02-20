@@ -16,7 +16,7 @@ from . import __version__
 from .config import GCGAAPConfig, setup_logging
 from .entity_map import EntityMap
 from .gnucash_access import GnuCashBook, parse_date
-from .validate import validate_book, scan_unmapped_accounts
+from .validate import validate_book, scan_unmapped_accounts, check_cross_entity_balancing_accounts
 from .entity_inference import EntityInferenceEngine
 from .violations import generate_violations_report, format_violations_report
 from .cross_entity import analyze_cross_entity_transactions
@@ -35,6 +35,13 @@ from .repair import (
     diagnose_empty_reconcile_dates,
     repair_empty_reconcile_dates,
     RepairResult
+)
+from .balance_xacts import (
+    create_backup,
+    find_equity_accounts,
+    identify_fixable_transactions,
+    group_transactions,
+    balance_transaction_groups
 )
 
 logger = logging.getLogger(__name__)
@@ -90,6 +97,9 @@ def entity_scan(book_file, entity_map_file):
     Lists all accounts in the GnuCash book that are not currently
     mapped to any entity in the entity_account_map.json file.
     
+    Also checks for cross-entity balancing equity accounts and reports
+    on their presence or absence for each entity.
+    
     This is useful for identifying accounts that need to be added
     to the entity mapping configuration.
     """
@@ -102,26 +112,70 @@ def entity_scan(book_file, entity_map_file):
         # Open book and scan
         with GnuCashBook(book_file) as book:
             unmapped = scan_unmapped_accounts(book, entity_map)
+            balancing_status = check_cross_entity_balancing_accounts(book, entity_map)
         
-        # Display results
+        # Display unmapped accounts
         if not unmapped:
             click.echo("[OK] All accounts are mapped to entities.")
-            sys.exit(0)
+        else:
+            click.echo(f"\nFound {len(unmapped)} unmapped account(s):\n")
+            click.echo(f"{'GUID':<40} {'Type':<15} {'Currency':<10} {'Full Name'}")
+            click.echo("-" * 120)
+            
+            for account in unmapped:
+                click.echo(
+                    f"{account.guid:<40} "
+                    f"{account.type:<15} "
+                    f"{account.commodity_symbol:<10} "
+                    f"{account.full_name}"
+                )
+            
+            click.echo(f"\n{len(unmapped)} account(s) need entity mapping.")
+            click.echo(f"Edit {entity_map_file} to add mappings for these accounts.")
         
-        click.echo(f"\nFound {len(unmapped)} unmapped account(s):\n")
-        click.echo(f"{'GUID':<40} {'Type':<15} {'Currency':<10} {'Full Name'}")
-        click.echo("-" * 120)
+        # Display cross-entity balancing account status
+        click.echo("\n" + "=" * 80)
+        click.echo("CROSS-ENTITY BALANCING ACCOUNT STATUS")
+        click.echo("=" * 80)
+        click.echo()
         
-        for account in unmapped:
-            click.echo(
-                f"{account.guid:<40} "
-                f"{account.type:<15} "
-                f"{account.commodity_symbol:<10} "
-                f"{account.full_name}"
-            )
+        entities_with_balancing = []
+        entities_without_balancing = []
         
-        click.echo(f"\n{len(unmapped)} account(s) need entity mapping.")
-        click.echo(f"Edit {entity_map_file} to add mappings for these accounts.")
+        for entity_key, status in sorted(balancing_status.items(), key=lambda x: x[1].entity_label):
+            if status.has_balancing_account:
+                entities_with_balancing.append(status)
+            else:
+                entities_without_balancing.append(status)
+        
+        if entities_with_balancing:
+            click.echo("✓ Entities WITH cross-entity balancing accounts:")
+            click.echo()
+            for status in entities_with_balancing:
+                click.echo(f"  ✓ {status.entity_label} ({status.entity_key})")
+                for account_name in status.balancing_accounts:
+                    click.echo(f"      - {account_name}")
+            click.echo()
+        
+        if entities_without_balancing:
+            click.echo("⚠ Entities WITHOUT cross-entity balancing accounts:")
+            click.echo()
+            for status in entities_without_balancing:
+                click.echo(f"  ⚠ {status.entity_label} ({status.entity_key})")
+            click.echo()
+            click.echo("Consider creating cross-entity balancing equity accounts for these entities")
+            click.echo("if they participate in cross-entity transactions (e.g., shared credit cards).")
+            click.echo()
+            click.echo("Recommended account names:")
+            click.echo("  - Equity:Cross-Entity Balancing")
+            click.echo("  - Equity:Inter-Entity")
+            click.echo()
+        
+        # Summary
+        click.echo("=" * 80)
+        click.echo(f"Summary: {len(entities_with_balancing)} entities with balancing accounts, "
+                   f"{len(entities_without_balancing)} without")
+        click.echo("=" * 80)
         
         # Exit with success (this is informational, not an error)
         sys.exit(0)
@@ -868,6 +922,12 @@ def violations(book_file, entity_map_file, as_of, tolerance):
     help="Analysis date in YYYY-MM-DD format (default: all transactions)."
 )
 @click.option(
+    "--entity",
+    type=str,
+    default=None,
+    help="Filter to show only cross-entity transactions involving this specific entity."
+)
+@click.option(
     "--verbose",
     "-v",
     is_flag=True,
@@ -886,7 +946,7 @@ def violations(book_file, entity_map_file, as_of, tolerance):
     is_flag=True,
     help="Show unbalanced transactions in simple format: one line per split with account, date, amount."
 )
-def cross_entity(book_file, entity_map_file, as_of, verbose, limit, simple):
+def cross_entity(book_file, entity_map_file, as_of, entity, verbose, limit, simple):
     """
     Analyze cross-entity transactions and identify imbalances.
     
@@ -930,6 +990,12 @@ def cross_entity(book_file, entity_map_file, as_of, verbose, limit, simple):
         # Load entity map
         entity_map = EntityMap.load(entity_map_file)
         
+        # Validate entity key if specified
+        if entity and entity not in entity_map.entities:
+            click.echo(f"Error: Entity '{entity}' not found in entity map.")
+            click.echo(f"Available entities: {', '.join(entity_map.entities.keys())}")
+            sys.exit(1)
+        
         # Parse as_of_date
         as_of_date = None
         if as_of:
@@ -937,6 +1003,11 @@ def cross_entity(book_file, entity_map_file, as_of, verbose, limit, simple):
             click.echo(f"Analyzing transactions as of {as_of_date}")
         else:
             click.echo("Analyzing all transactions")
+        
+        if entity:
+            entity_label = entity_map.entities[entity].label
+            click.echo(f"Filtering to show only transactions involving: {entity_label} ({entity})")
+        
         click.echo()
         
         # Open book and analyze
@@ -946,6 +1017,10 @@ def cross_entity(book_file, entity_map_file, as_of, verbose, limit, simple):
                 entity_map=entity_map,
                 as_of_date=as_of_date
             )
+        
+        # Filter by entity if specified
+        if entity:
+            analysis = analysis.filter_by_entity(entity)
         
         # Display summary
         summary = analysis.format_summary()
@@ -986,6 +1061,239 @@ def cross_entity(book_file, entity_map_file, as_of, verbose, limit, simple):
         sys.exit(1)
     except Exception as e:
         logger.error(f"Error analyzing cross-entity transactions: {e}", exc_info=True)
+        sys.exit(1)
+
+
+@main.command(name="balance-xacts")
+@click.option(
+    "--file",
+    "-f",
+    "book_file",
+    type=click.Path(exists=True, path_type=Path),
+    required=True,
+    help="Path to the GnuCash book file (.gnucash)."
+)
+@click.option(
+    "--entity-map",
+    "-e",
+    "entity_map_file",
+    type=click.Path(path_type=Path),
+    default="entity_account_map.json",
+    help="Path to the entity mapping JSON file (default: entity_account_map.json)."
+)
+@click.option(
+    "--entity",
+    type=str,
+    default=None,
+    help="Filter to transactions involving this entity."
+)
+@click.option(
+    "--date-from",
+    type=str,
+    default=None,
+    help="Start date filter (YYYY-MM-DD)."
+)
+@click.option(
+    "--date-to",
+    type=str,
+    default=None,
+    help="End date filter (YYYY-MM-DD)."
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Preview changes without modifying the database."
+)
+def balance_xacts(book_file, entity_map_file, entity, date_from, date_to, dry_run):
+    """
+    Balance 2-split cross-entity transactions by adding equity account splits.
+    
+    This command identifies cross-entity transactions with exactly 2 splits
+    that span 2 different entities, and automatically adds two balancing
+    splits using inter-entity equity accounts (Money In/Out).
+    
+    \b
+    Process:
+    1. Identifies 2-split cross-entity transactions that need balancing
+    2. Groups transactions by entity pair and expense account (max 9 per group)
+    3. Presents each group for user approval
+    4. Adds balancing splits with cross-referenced memos
+    5. Saves changes after each approved group
+    
+    \b
+    Requirements:
+    - Each entity must have "Money In (entity)" and "Money Out (entity)" equity accounts
+    - These accounts must be properly mapped to entities in entity_account_map.json
+    - Transactions must have exactly 2 splits, each in a different entity
+    
+    \b
+    A backup is automatically created before any changes are made.
+    """
+    logger.info("=== GCGAAP Balance Cross-Entity Transactions ===")
+    
+    try:
+        # Parse date filters
+        parsed_date_from = None
+        parsed_date_to = None
+        
+        if date_from:
+            parsed_date_from = parse_date(date_from)
+            if not parsed_date_from:
+                click.echo(f"Error: Invalid date format for --date-from: {date_from}")
+                click.echo("Expected format: YYYY-MM-DD")
+                sys.exit(1)
+            logger.info(f"Filtering transactions from: {parsed_date_from}")
+        
+        if date_to:
+            parsed_date_to = parse_date(date_to)
+            if not parsed_date_to:
+                click.echo(f"Error: Invalid date format for --date-to: {date_to}")
+                click.echo("Expected format: YYYY-MM-DD")
+                sys.exit(1)
+            logger.info(f"Filtering transactions to: {parsed_date_to}")
+        
+        # Load entity map
+        entity_map = EntityMap.load(entity_map_file)
+        
+        # Validate entity filter if specified
+        if entity and entity not in entity_map.entities:
+            click.echo(f"Error: Entity '{entity}' not found in entity map.")
+            click.echo(f"Available entities: {', '.join(entity_map.entities.keys())}")
+            sys.exit(1)
+        
+        if entity:
+            logger.info(f"Filtering to entity: {entity}")
+        
+        # Step 1: Analyze cross-entity transactions
+        click.echo("\n" + "=" * 80)
+        click.echo("STEP 1: Analyzing cross-entity transactions...")
+        click.echo("=" * 80)
+        
+        with GnuCashBook(book_file) as book:
+            analysis = analyze_cross_entity_transactions(book, entity_map)
+        
+        # Step 2: Identify fixable transactions
+        click.echo("\n" + "=" * 80)
+        click.echo("STEP 2: Identifying fixable 2-split transactions...")
+        click.echo("=" * 80)
+        
+        fixable = identify_fixable_transactions(
+            analysis,
+            date_from=parsed_date_from,
+            date_to=parsed_date_to,
+            entity_filter=entity
+        )
+        
+        if not fixable:
+            click.echo("\nNo fixable transactions found!")
+            click.echo("(Looking for 2-split cross-entity transactions with imbalances)")
+            sys.exit(0)
+        
+        click.echo(f"\nFound {len(fixable)} fixable transaction(s)")
+        
+        # Step 3: Check for required equity accounts
+        click.echo("\n" + "=" * 80)
+        click.echo("STEP 3: Checking for inter-entity equity accounts...")
+        click.echo("=" * 80)
+        
+        import piecash
+        
+        # Open book to check equity accounts
+        book_obj = piecash.open_book(str(book_file), readonly=True, do_backup=False)
+        equity_accounts_map = find_equity_accounts(book_obj, entity_map)
+        book_obj.close()
+        
+        # Check which entities are involved in fixable transactions
+        involved_entities = set()
+        for txn in fixable:
+            involved_entities.update(txn.entities_involved)
+        
+        # Verify all involved entities have equity accounts
+        missing_accounts = []
+        for entity_key in involved_entities:
+            if entity_key not in equity_accounts_map:
+                missing_accounts.append(f"  - {entity_key}: No equity accounts found")
+            elif not equity_accounts_map[entity_key].has_both_accounts():
+                equity = equity_accounts_map[entity_key]
+                if not equity.money_in_account:
+                    missing_accounts.append(f"  - {entity_key}: Missing 'Money In' account")
+                if not equity.money_out_account:
+                    missing_accounts.append(f"  - {entity_key}: Missing 'Money Out' account")
+        
+        if missing_accounts:
+            click.echo("\n[ERROR] Missing required equity accounts:")
+            for msg in missing_accounts:
+                click.echo(msg)
+            click.echo("\nRequired account pattern for each entity:")
+            click.echo("  Equity:<EntityName>:Money In (<OtherEntity>)")
+            click.echo("  Equity:<EntityName>:Money Out (<OtherEntity>)")
+            click.echo("\nCreate these accounts in GnuCash and map them to entities.")
+            sys.exit(1)
+        
+        click.echo(f"\n[OK] All {len(involved_entities)} involved entities have required equity accounts")
+        
+        # Step 4: Group transactions
+        click.echo("\n" + "=" * 80)
+        click.echo("STEP 4: Grouping similar transactions...")
+        click.echo("=" * 80)
+        
+        groups = group_transactions(fixable)
+        
+        click.echo(f"\nCreated {len(groups)} group(s) for approval")
+        
+        # Step 5: Create backup (unless dry-run)
+        if not dry_run:
+            click.echo("\n" + "=" * 80)
+            click.echo("STEP 5: Creating backup...")
+            click.echo("=" * 80)
+            
+            backup_path = create_backup(book_file)
+            click.echo(f"\n[OK] Backup created: {backup_path}")
+        else:
+            click.echo("\n[DRY RUN] Skipping backup creation")
+        
+        # Step 6: Process groups with user approval
+        click.echo("\n" + "=" * 80)
+        if dry_run:
+            click.echo("STEP 6: Processing groups (DRY RUN - no changes will be made)...")
+        else:
+            click.echo("STEP 6: Processing groups (you will approve each group)...")
+        click.echo("=" * 80)
+        
+        fixed_count, failed_count = balance_transaction_groups(
+            book_file,
+            groups,
+            equity_accounts_map,
+            dry_run=dry_run
+        )
+        
+        # Summary
+        click.echo("\n" + "=" * 80)
+        click.echo("SUMMARY")
+        click.echo("=" * 80)
+        
+        if dry_run:
+            click.echo(f"\n[DRY RUN] Would have processed {fixed_count} transaction(s)")
+            click.echo("\nRun without --dry-run to actually make changes.")
+        else:
+            click.echo(f"\n[OK] Successfully balanced: {fixed_count} transaction(s)")
+            if failed_count > 0:
+                click.echo(f"✗ Failed to balance: {failed_count} transaction(s)")
+            
+            if fixed_count > 0:
+                click.echo("\nChanges have been saved to the GnuCash database.")
+                click.echo(f"Backup available at: {backup_path}")
+                click.echo("\nRecommendation: Run 'gcgaap cross-entity' to verify balances.")
+        
+        sys.exit(0 if failed_count == 0 else 1)
+        
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        click.echo(f"\nError: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error balancing transactions: {e}", exc_info=True)
+        click.echo(f"\nError: {e}")
         sys.exit(1)
 
 

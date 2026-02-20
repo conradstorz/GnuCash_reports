@@ -494,6 +494,95 @@ def scan_unmapped_accounts(
     return unmapped_accounts
 
 
+@dataclass
+class BalancingAccountStatus:
+    """
+    Status of cross-entity balancing accounts for an entity.
+    
+    Attributes:
+        entity_key: The entity key.
+        entity_label: Human-readable entity label.
+        has_balancing_account: Whether entity has a cross-entity balancing equity account.
+        balancing_accounts: List of balancing account names found.
+    """
+    entity_key: str
+    entity_label: str
+    has_balancing_account: bool
+    balancing_accounts: list[str] = field(default_factory=list)
+
+
+def check_cross_entity_balancing_accounts(
+    book: GnuCashBook,
+    entity_map: EntityMap
+) -> dict[str, BalancingAccountStatus]:
+    """
+    Check each entity for cross-entity balancing equity accounts.
+    
+    Cross-entity balancing accounts are equity accounts used to track
+    inter-entity balances when transactions span multiple entities.
+    Common patterns include:
+    - Equity:Cross-Entity Balancing
+    - Equity:Inter-Entity
+    - Equity:Cross Entity
+    - Equity:*Balancing* (containing "balancing")
+    - Equity:*Inter*Entity* (containing "inter" and "entity")
+    
+    Args:
+        book: Opened GnuCashBook.
+        entity_map: EntityMap for account-to-entity resolution.
+        
+    Returns:
+        Dictionary mapping entity_key to BalancingAccountStatus.
+    """
+    logger.info("Checking for cross-entity balancing equity accounts")
+    
+    # Initialize status for all entities (except structural ones)
+    status_map = {}
+    for entity_key, entity_def in entity_map.entities.items():
+        if entity_def.type != "structural":  # Skip placeholder-only entities
+            status_map[entity_key] = BalancingAccountStatus(
+                entity_key=entity_key,
+                entity_label=entity_def.label,
+                has_balancing_account=False,
+                balancing_accounts=[]
+            )
+    
+    # Scan all accounts for balancing equity accounts
+    for account in book.iter_accounts():
+        # Only check Equity accounts
+        if account.type != "EQUITY":
+            continue
+        
+        # Check if account name matches balancing patterns
+        name_lower = account.full_name.lower()
+        is_balancing = (
+            "cross-entity" in name_lower or
+            "cross entity" in name_lower or
+            "inter-entity" in name_lower or
+            "inter entity" in name_lower or
+            ("balancing" in name_lower and "equity" in name_lower) or
+            ("inter" in name_lower and "entity" in name_lower and "equity" in name_lower)
+        )
+        
+        if is_balancing:
+            # Resolve which entity this account belongs to
+            entity_key = entity_map.resolve_entity_for_account(
+                account.guid,
+                account.full_name
+            )
+            
+            if entity_key in status_map:
+                status_map[entity_key].has_balancing_account = True
+                status_map[entity_key].balancing_accounts.append(account.full_name)
+    
+    logger.info(
+        f"Found balancing accounts in {sum(1 for s in status_map.values() if s.has_balancing_account)} "
+        f"of {len(status_map)} entities"
+    )
+    
+    return status_map
+
+
 def validate_for_reporting(
     book: GnuCashBook,
     entity_map: EntityMap,

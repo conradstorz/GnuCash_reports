@@ -22,37 +22,37 @@ First, create these accounts in GnuCash if they don't already exist:
 
 ### For Storz Cash (Business Entity):
 ```
-Equity:Storz Cash:Due to Personal
-Equity:Storz Cash:Due from Personal
+Equity:Storz Cash:Money Out (Personal)
+Equity:Storz Cash:Money In (Personal)
 ```
 
 ### For Storz Amusements (Business Entity):
 ```
-Equity:Storz Amusements:Due to Personal
-Equity:Storz Amusements:Due from Personal
+Equity:Storz Amusements:Money Out (Personal)
+Equity:Storz Amusements:Money In (Personal)
 ```
 
 ### For Storz Property (Business Entity):
 ```
-Equity:Storz Property:Due to Personal
-Equity:Storz Property:Due from Personal
+Equity:Storz Property:Money Out (Personal)
+Equity:Storz Property:Money In (Personal)
 ```
 
 ### For Personal Entity:
 ```
-Equity:Personal:Due from Storz Cash
-Equity:Personal:Due to Storz Cash
-Equity:Personal:Due from Storz Amusements
-Equity:Personal:Due to Storz Amusements
-Equity:Personal:Due from Storz Property
-Equity:Personal:Due to Storz Property
+Equity:Personal:Money In (Storz Cash)
+Equity:Personal:Money Out (Storz Cash)
+Equity:Personal:Money In (Storz Amusements)
+Equity:Personal:Money Out (Storz Amusements)
+Equity:Personal:Money In (Storz Property)
+Equity:Personal:Money Out (Storz Property)
 ```
 
 **Important:** Map these accounts to entities in your `entity_account_map.json`:
-- "Due to Personal" accounts → Map to the **business** entity
-- "Due from [Business]" accounts → Map to **personal** entity
-- "Due from Personal" accounts → Map to the **business** entity
-- "Due to [Business]" accounts → Map to **personal** entity
+- "Money Out (Personal)" accounts → Map to the **business** entity
+- "Money In ([Business])" accounts → Map to **personal** entity
+- "Money In (Personal)" accounts → Map to the **business** entity
+- "Money Out ([Business])" accounts → Map to **personal** entity
 
 ## Step 2: Enter Balancing Transactions
 
@@ -69,14 +69,14 @@ Enter these transactions in GnuCash to balance the inter-entity accounts:
 
 #### Split 1 (in Storz Cash entity):
 ```
-Account:  Equity:Storz Cash:Due to Personal
+Account:  Equity:Storz Cash:Money Out (Personal)
 Debit:    $52,469.63
 Credit:   
 ```
 
 #### Split 2 (in Personal entity):
 ```
-Account:  Equity:Personal:Due from Storz Cash
+Account:  Equity:Personal:Money In (Storz Cash)
 Debit:    $52,469.63
 Credit:   
 ```
@@ -86,8 +86,8 @@ Credit:
 Date: 2026-02-16
 Description: Balance Storz Cash inter-entity account
 Splits:
-  1. Equity:Storz Cash:Due to Personal         | Increase | $52,469.63
-  2. Equity:Personal:Due from Storz Cash       | Increase | $52,469.63
+  1. Equity:Storz Cash:Money Out (Personal)    | Increase | $52,469.63
+  2. Equity:Personal:Money In (Storz Cash)     | Increase | $52,469.63
 ```
 
 ---
@@ -101,14 +101,14 @@ Splits:
 
 #### Split 1 (in Storz Amusements entity):
 ```
-Account:  Equity:Storz Amusements:Due to Personal
+Account:  Equity:Storz Amusements:Money Out (Personal)
 Debit:    $11,905.05
 Credit:   
 ```
 
 #### Split 2 (in Personal entity):
 ```
-Account:  Equity:Personal:Due from Storz Amusements
+Account:  Equity:Personal:Money In (Storz Amusements)
 Debit:    $11,905.05
 Credit:   
 ```
@@ -118,8 +118,8 @@ Credit:
 Date: 2026-02-16
 Description: Balance Storz Amusements inter-entity account
 Splits:
-  1. Equity:Storz Amusements:Due to Personal   | Increase | $11,905.05
-  2. Equity:Personal:Due from Storz Amusements | Increase | $11,905.05
+  1. Equity:Storz Amusements:Money Out (Personal)   | Increase | $11,905.05
+  2. Equity:Personal:Money In (Storz Amusements)    | Increase | $11,905.05
 ```
 
 ---
@@ -133,14 +133,14 @@ Splits:
 
 #### Split 1 (in Personal entity):
 ```
-Account:  Equity:Personal:Due to Storz Property
+Account:  Equity:Personal:Money Out (Storz Property)
 Debit:    $1,951.17
 Credit:   
 ```
 
 #### Split 2 (in Storz Property entity):
 ```
-Account:  Equity:Storz Property:Due from Personal
+Account:  Equity:Storz Property:Money In (Personal)
 Debit:    $1,951.17
 Credit:   
 ```
@@ -150,8 +150,8 @@ Credit:
 Date: 2026-02-16
 Description: Balance Storz Property inter-entity account
 Splits:
-  1. Equity:Personal:Due to Storz Property     | Increase | $1,951.17
-  2. Equity:Storz Property:Due from Personal   | Increase | $1,951.17
+  1. Equity:Personal:Money Out (Storz Property)     | Increase | $1,951.17
+  2. Equity:Storz Property:Money In (Personal)      | Increase | $1,951.17
 ```
 
 ---
@@ -166,28 +166,28 @@ gcgaap cross-entity -f yourbook.gnucash -e entity_account_map.json
 
 You should see:
 - All entity imbalances reduced to near-zero (within a few cents for rounding)
-- The inter-entity "Due to/from" accounts showing the correct balances
+- The inter-entity "Money In/Out" accounts showing the correct balances
 
 ## Step 4: Understanding the Results
 
 After these transactions:
 
 ### Personal Entity Balance Sheet will show:
-- **Assets:** Due from Storz Cash: $52,469.63
-- **Assets:** Due from Storz Amusements: $11,905.05
-- **Liabilities:** Due to Storz Property: $1,951.17
+- **Assets:** Money In (Storz Cash): $52,469.63
+- **Assets:** Money In (Storz Amusements): $11,905.05
+- **Liabilities:** Money Out (Storz Property): $1,951.17
 - **Net:** Personal is owed $62,423.51 by the businesses
 
 ### Storz Cash Balance Sheet will show:
-- **Liabilities:** Due to Personal: $52,469.63
+- **Liabilities:** Money Out (Personal): $52,469.63
 - This represents expenses paid by personal funds that should be reimbursed
 
 ### Storz Amusements Balance Sheet will show:
-- **Liabilities:** Due to Personal: $11,905.05
+- **Liabilities:** Money Out (Personal): $11,905.05
 - This represents expenses paid by personal funds that should be reimbursed
 
 ### Storz Property Balance Sheet will show:
-- **Assets:** Due from Personal: $1,951.17
+- **Assets:** Money In (Personal): $1,951.17
 - This represents income or benefits received by personal that should be paid back
 
 ## Step 5: Going Forward
@@ -203,8 +203,8 @@ Now that historical imbalances are fixed, record new shared credit card transact
 Date: [Transaction Date]
 Description: Office supplies
 Splits:
-  1. Expenses:Storz Amusements:Office Supplies     | Increase | $100.00
-  2. Equity:Storz Amusements:Due to Personal       | Increase | $100.00
+  1. Expenses:Storz Amusements:Office Supplies        | Increase | $100.00
+  2. Equity:Storz Amusements:Money Out (Personal)     | Increase | $100.00
 ```
 
 **Transaction 2:** Record the credit card charge in personal
@@ -212,8 +212,8 @@ Splits:
 Date: [Transaction Date]
 Description: Office supplies - Storz Amusements expense
 Splits:
-  1. Equity:Personal:Due from Storz Amusements     | Increase | $100.00
-  2. Liabilities:Personal:AmEx Card                | Increase | $100.00
+  1. Equity:Personal:Money In (Storz Amusements)      | Increase | $100.00
+  2. Liabilities:Personal:AmEx Card                   | Increase | $100.00
 ```
 
 This keeps both entities balanced and properly tracks the inter-entity debt.
@@ -224,12 +224,12 @@ This keeps both entities balanced and properly tracks the inter-entity debt.
 Date: [Payment Date]
 Description: Reimbursement to personal for expenses
 Splits (in Storz Amusements):
-  1. Assets:Storz Amusements:Checking              | Decrease | $500.00
-  2. Equity:Storz Amusements:Due to Personal       | Decrease | $500.00
+  1. Assets:Storz Amusements:Checking                 | Decrease | $500.00
+  2. Equity:Storz Amusements:Money Out (Personal)     | Decrease | $500.00
 
 Splits (in Personal):
-  1. Assets:Personal:Checking                      | Increase | $500.00
-  2. Equity:Personal:Due from Storz Amusements     | Decrease | $500.00
+  1. Assets:Personal:Checking                         | Increase | $500.00
+  2. Equity:Personal:Money In (Storz Amusements)      | Decrease | $500.00
 ```
 
 ## Troubleshooting

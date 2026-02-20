@@ -125,6 +125,73 @@ class CrossEntityAnalysis:
             if abs(float(amount)) > tolerance
         ]
     
+    def filter_by_entity(self, entity_key: str) -> "CrossEntityAnalysis":
+        """
+        Create a filtered analysis containing only transactions involving the specified entity.
+        
+        Args:
+            entity_key: The entity key to filter by.
+            
+        Returns:
+            New CrossEntityAnalysis with filtered transactions.
+        """
+        # Filter transactions to only those involving the specified entity
+        filtered_txns = [
+            txn for txn in self.cross_entity_transactions
+            if entity_key in txn.entities_involved
+        ]
+        
+        # Create new analysis with filtered transactions
+        filtered_analysis = CrossEntityAnalysis(as_of_date=self.as_of_date)
+        filtered_analysis.cross_entity_transactions = filtered_txns
+        
+        # Recalculate entity imbalances
+        entity_imbalances: dict[str, Decimal] = defaultdict(Decimal)
+        for txn in filtered_txns:
+            for entity, amount in txn.entity_amounts.items():
+                entity_imbalances[entity] += amount
+        filtered_analysis.entity_imbalances = dict(entity_imbalances)
+        
+        # Recalculate inter-entity balances
+        inter_entity_flows: dict[tuple[str, str], list[Decimal]] = defaultdict(list)
+        for txn in filtered_txns:
+            entities = list(txn.entities_involved)
+            if len(entities) >= 2:
+                for i, entity1 in enumerate(entities):
+                    for entity2 in entities[i+1:]:
+                        amount1 = txn.entity_amounts.get(entity1, Decimal("0"))
+                        amount2 = txn.entity_amounts.get(entity2, Decimal("0"))
+                        
+                        # Track flow from entity1 perspective
+                        flow = -amount1
+                        
+                        # Normalize entity pair order
+                        pair = tuple(sorted([entity1, entity2]))
+                        if entity1 != pair[0]:
+                            flow = -flow
+                        
+                        inter_entity_flows[pair].append(flow)
+        
+        # Create inter-entity balances
+        inter_entity_balances = []
+        for (entity1, entity2), flows in inter_entity_flows.items():
+            net_flow = sum(flows)
+            if abs(float(net_flow)) > 0.01:  # Only include significant flows
+                inter_entity_balances.append(InterEntityBalance(
+                    from_entity=entity1 if net_flow < 0 else entity2,
+                    to_entity=entity2 if net_flow < 0 else entity1,
+                    amount=abs(net_flow),
+                    transaction_count=len([f for f in flows if abs(float(f)) > 0.01])
+                ))
+        
+        filtered_analysis.inter_entity_balances = sorted(
+            inter_entity_balances,
+            key=lambda x: x.amount,
+            reverse=True
+        )
+        
+        return filtered_analysis
+    
     def format_transaction_details(self, limit: Optional[int] = None, tolerance: float = 0.01) -> str:
         """
         Format detailed information about cross-entity transactions.

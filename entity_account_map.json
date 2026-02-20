@@ -1,12 +1,12 @@
 {
   "summary": {
-    "total_accounts": 198,
+    "total_accounts": 191,
     "entity_counts": {
-      "placeholder_only_acct": 57,
-      "personal": 52,
-      "storz_amusements": 33,
-      "storz_cash": 35,
-      "storz_property": 19,
+      "placeholder_only_acct": 56,
+      "personal": 49,
+      "storz_amusements": 32,
+      "storz_cash": 34,
+      "storz_property": 18,
       "unassigned": 2
     },
     "entity_labels": {
@@ -371,13 +371,6 @@
         "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
       },
       {
-        "guid": "9038eac6a9dc40958c7d804759bbd542",
-        "name": "Citibank Costco card",
-        "full_name": "Liabilities root:Credit Cards:Citibank Costco card",
-        "type": "LIABILITY",
-        "parent_guid": "0431a435ff104376bd3de4ce652dd99f"
-      },
-      {
         "guid": "626e5c2b1cc446aaae2341f230e1d66d",
         "name": "Loans",
         "full_name": "Liabilities root:Loans",
@@ -553,27 +546,6 @@
         "full_name": "Equity root:3023 Old hill Rd. Owners Investments",
         "type": "EQUITY",
         "parent_guid": "86da0cb0a9a2463b99d3d24c9ab405e0"
-      },
-      {
-        "guid": "7e88ef442d1f48d3b4d94b5b5703ab8d",
-        "name": "DUE from SAMUSE",
-        "full_name": "Equity root:3023 Old hill Rd. Owners Investments:DUE from SAMUSE",
-        "type": "EQUITY",
-        "parent_guid": "b44c8a7056e0406eb013e1c59b529ea5"
-      },
-      {
-        "guid": "a8501f0b23494969a6f255f04e311d62",
-        "name": "DUE from SCSLLC",
-        "full_name": "Equity root:3023 Old hill Rd. Owners Investments:DUE from SCSLLC",
-        "type": "EQUITY",
-        "parent_guid": "b44c8a7056e0406eb013e1c59b529ea5"
-      },
-      {
-        "guid": "c2c37c6749794d9ca704714ce16db11a",
-        "name": "DUE from SMPLLC",
-        "full_name": "Equity root:3023 Old hill Rd. Owners Investments:DUE from SMPLLC",
-        "type": "EQUITY",
-        "parent_guid": "b44c8a7056e0406eb013e1c59b529ea5"
       },
       {
         "guid": "1cb456da520d4309a6674526e6db4c61",
@@ -772,11 +744,11 @@
         "parent_guid": "a5fdf0b840384ea5aa373dc9a2a21dc6"
       },
       {
-        "guid": "cfe941e9f0d94e32b4dd18d3d38ef293",
-        "name": "Personal Citicard charges",
-        "full_name": "Liabilities root:Credit Cards:Citibank Costco card:Personal Citicard charges",
+        "guid": "9038eac6a9dc40958c7d804759bbd542",
+        "name": "Citibank Costco card",
+        "full_name": "Liabilities root:Credit Cards:3023 Old Hill Road:Citibank Costco card",
         "type": "LIABILITY",
-        "parent_guid": "9038eac6a9dc40958c7d804759bbd542"
+        "parent_guid": "a5fdf0b840384ea5aa373dc9a2a21dc6"
       },
       {
         "guid": "c624e86837664aa19925dceb580cc814",
@@ -989,13 +961,6 @@
         "full_name": "Liabilities root:Accounts Payable:Payables (SAMUSE)",
         "type": "PAYABLE",
         "parent_guid": "3996061b944741aca6f2d513f495690a"
-      },
-      {
-        "guid": "03050227279046f08803c5ba5c54e595",
-        "name": "SAMUSE Citicard Expenses",
-        "full_name": "Liabilities root:Credit Cards:Citibank Costco card:SAMUSE Citicard Expenses",
-        "type": "LIABILITY",
-        "parent_guid": "9038eac6a9dc40958c7d804759bbd542"
       },
       {
         "guid": "9f1198da36b14e91be4701d2dabce2fb",
@@ -1252,13 +1217,6 @@
         "parent_guid": "3996061b944741aca6f2d513f495690a"
       },
       {
-        "guid": "b7c0b4be84934bfcb66cc647e378292b",
-        "name": "SCSLLC Citicard Expenses",
-        "full_name": "Liabilities root:Credit Cards:Citibank Costco card:SCSLLC Citicard Expenses",
-        "type": "LIABILITY",
-        "parent_guid": "9038eac6a9dc40958c7d804759bbd542"
-      },
-      {
         "guid": "f7b294741e3d44dbbc7ce078b3602ff2",
         "name": "SCS Covid SBA Loan",
         "full_name": "Liabilities root:Loans:Storz Cash Services:SCS Covid SBA Loan",
@@ -1392,13 +1350,6 @@
         "full_name": "Liabilities root:Accounts Payable:Payables (SPMLLC)",
         "type": "PAYABLE",
         "parent_guid": "3996061b944741aca6f2d513f495690a"
-      },
-      {
-        "guid": "e82c896c52754562a23465c93f2188dd",
-        "name": "SPMLLC Citicard Expenses",
-        "full_name": "Liabilities root:Credit Cards:Citibank Costco card:SPMLLC Citicard Expenses",
-        "type": "LIABILITY",
-        "parent_guid": "9038eac6a9dc40958c7d804759bbd542"
       }
     ],
     "unassigned": [

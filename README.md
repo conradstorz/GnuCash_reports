@@ -72,7 +72,20 @@ gcgaap entity-infer --file mybook.gnucash --output entity-map.json
 
 Review and edit `entity-map.json` to refine the mappings.
 
-**Step 3: Check data quality**
+**Step 3: Scan for unmapped accounts and verify balancing accounts**
+
+```bash
+gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json
+```
+
+This command shows:
+- Accounts that need entity mapping
+- Which entities have cross-entity balancing equity accounts
+- Which entities are missing balancing accounts (if they have cross-entity transactions)
+
+Cross-entity balancing accounts (like "Equity:Cross-Entity Balancing" or "Equity:Inter-Entity") are used to track balances between entities when transactions span multiple entities.
+
+**Step 4: Check data quality**
 
 Run a comprehensive violations report:
 
@@ -256,7 +269,7 @@ This scans all accounts and maps them based on naming patterns with parent-child
 |---------|---------|---------|
 | `repair-dates` | Fix empty date fields | `gcgaap repair-dates --file mybook.gnucash` |
 | `entity-infer` | Auto-detect entities | `gcgaap entity-infer --file mybook.gnucash --output entity-map.json` |
-| `entity-scan` | Find unmapped accounts | `gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json` |
+| `entity-scan` | Find unmapped accounts & check balancing accounts | `gcgaap entity-scan --file mybook.gnucash --entity-map entity-map.json` |
 | `entity-remap` | Regenerate entity mapping | `gcgaap entity-remap --file mybook.gnucash --output entity-map.json` |
 | `violations` | Data quality report | `gcgaap violations --file mybook.gnucash --as-of 2026-12-31` |
 | `validate` | Validate book integrity | `gcgaap validate --file mybook.gnucash --entity-map entity-map.json --strict` |
