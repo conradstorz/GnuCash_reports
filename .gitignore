@@ -47,6 +47,12 @@ entity-map-*.json
 *.bak
 .cache/
 
+# Test output files
+*_output.txt
+*_dryrun.txt
+balance_xacts_output.txt
+storz_property_dryrun.txt
+
 # Operational data (contains private database information)
 snapshot_*.json
 validation_report*
