@@ -203,7 +203,7 @@ def generate_balance_sheet(
     # STEP 1: MANDATORY strict validation
     logger.info("Step 1: Running strict validation (required for GAAP compliance)")
     validate_for_reporting(book, entity_map, config)
-    logger.info("✓ Strict validation passed")
+    logger.info("[OK] Strict validation passed")
     
     # STEP 2: Get all accounts and balances
     logger.info("Step 2: Calculating account balances")
@@ -322,7 +322,7 @@ def generate_balance_sheet(
         logger.error(error_msg)
         raise ValueError(error_msg)
     
-    logger.info("✓ Accounting equation verified (within tolerance)")
+    logger.info("[OK] Accounting equation verified (within tolerance)")
     logger.info(f"Total Assets: {balance_sheet.total_assets:,.2f}")
     logger.info(f"Total Liabilities: {balance_sheet.total_liabilities:,.2f}")
     logger.info(f"Total Equity: {balance_sheet.total_equity:,.2f}")
@@ -388,9 +388,9 @@ def format_as_text(balance_sheet: BalanceSheet) -> str:
     # Verification
     is_balanced, delta = balance_sheet.check_balance()
     if is_balanced:
-        output.write(f"\n✓ ACCOUNTING EQUATION VERIFIED: Assets = Liabilities + Equity\n")
+        output.write(f"\n[OK] ACCOUNTING EQUATION VERIFIED: Assets = Liabilities + Equity\n")
     else:
-        output.write(f"\n✗ WARNING: Imbalance of {delta:,.2f}\n")
+        output.write(f"\n[X] WARNING: Imbalance of {delta:,.2f}\n")
     
     return output.getvalue()
 

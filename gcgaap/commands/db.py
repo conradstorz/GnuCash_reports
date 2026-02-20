@@ -226,11 +226,11 @@ def repair_dates(book_file, diagnose_only, no_backup):
         count, descriptions = diagnose_empty_reconcile_dates(book_file)
 
         if count == 0:
-            click.echo("\n✓ No empty reconcile_date fields found.")
+            click.echo("\n[OK] No empty reconcile_date fields found.")
             click.echo("Your database is clean - no repairs needed!")
             sys.exit(0)
 
-        click.echo(f"\n⚠️  Found {count} split(s) with empty reconcile_date field")
+        click.echo(f"\n[!] Found {count} split(s) with empty reconcile_date field")
         click.echo(f"\nAffected transactions ({len(descriptions)}):")
         for desc in descriptions[:10]:
             click.echo(f"  - {desc}")
@@ -247,7 +247,7 @@ def repair_dates(book_file, diagnose_only, no_backup):
         if not no_backup:
             click.echo("A backup will be created before making changes.")
         else:
-            click.echo("⚠️  WARNING: No backup will be created (--no-backup flag)")
+            click.echo("[!] WARNING: No backup will be created (--no-backup flag)")
 
         click.echo("\nProceeding with repair...")
 
@@ -258,15 +258,15 @@ def repair_dates(book_file, diagnose_only, no_backup):
 
         click.echo()
         if result.success:
-            click.echo(f"✓ {result.message}")
+            click.echo(f"[OK] {result.message}")
             if result.backup_path:
-                click.echo(f"✓ Backup saved to: {result.backup_path}")
+                click.echo(f"[OK] Backup saved to: {result.backup_path}")
             click.echo(f"\nRepaired {result.items_fixed} split(s) successfully!")
             click.echo("\nYou can now run validation and reports without errors.")
             click.echo("If everything works, you can delete the backup file.")
             sys.exit(0)
         else:
-            click.echo(f"⚠️  {result.message}")
+            click.echo(f"[!] {result.message}")
             if result.backup_path:
                 click.echo(f"Backup saved to: {result.backup_path}")
             click.echo("\nPartial repair completed. Some issues may remain.")
@@ -392,10 +392,10 @@ def diff_snapshots(before_file, after_file, output_file, format):
 
         summary = changes["summary"]
         if summary["transactions_fixed"] > 0:
-            click.echo(f"\n✓ {summary['transactions_fixed']} transaction(s) were successfully fixed!")
+            click.echo(f"\n[OK] {summary['transactions_fixed']} transaction(s) were successfully fixed!")
 
         if summary["transactions_broken"] > 0:
-            click.echo(f"\n✗ WARNING: {summary['transactions_broken']} transaction(s) were damaged!")
+            click.echo(f"\n[X] WARNING: {summary['transactions_broken']} transaction(s) were damaged!")
             sys.exit(1)
 
         sys.exit(0)

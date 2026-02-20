@@ -161,27 +161,27 @@ def balance_check(book_file, entity_map_file, as_of):
         imbalanced_count = len(results) - balanced_count
 
         if balanced_count > 0:
-            click.echo(f"\n✓ BALANCED ({balanced_count}):")
+            click.echo(f"\n[OK] BALANCED ({balanced_count}):")
             click.echo("-" * 80)
             for result in results:
                 if result.balanced:
                     click.echo(
-                        f"  ✓ {result.entity_label:40s} "
+                        f"  [OK] {result.entity_label:40s} "
                         f"A: ${result.total_assets:>15,.2f}  "
                         f"L: ${result.total_liabilities:>15,.2f}  "
                         f"E: ${result.total_equity:>15,.2f}"
                     )
 
         if imbalanced_count > 0:
-            click.echo(f"\n✗ IMBALANCED ({imbalanced_count}):")
+            click.echo(f"\n[X] IMBALANCED ({imbalanced_count}):")
             click.echo("-" * 80)
             for result in results:
                 if not result.balanced:
                     if result.error:
-                        click.echo(f"  ✗ {result.entity_label:40s} ERROR: {result.error}")
+                        click.echo(f"  [X] {result.entity_label:40s} ERROR: {result.error}")
                     else:
                         click.echo(
-                            f"  ✗ {result.entity_label:40s} "
+                            f"  [X] {result.entity_label:40s} "
                             f"A: ${result.total_assets:>15,.2f}  "
                             f"L: ${result.total_liabilities:>15,.2f}  "
                             f"E: ${result.total_equity:>15,.2f}  "
@@ -191,10 +191,10 @@ def balance_check(book_file, entity_map_file, as_of):
         click.echo("\n" + "=" * 80)
 
         if imbalanced_count == 0:
-            click.echo("✓ ALL ENTITIES BALANCED - Books are in good order!")
+            click.echo("[OK] ALL ENTITIES BALANCED - Books are in good order!")
             sys.exit(0)
         else:
-            click.echo(f"✗ {imbalanced_count} entity/entities have accounting equation violations")
+            click.echo(f"[X] {imbalanced_count} entity/entities have accounting equation violations")
             click.echo("  Review and fix imbalanced entities before generating reports.")
             sys.exit(1)
 
@@ -203,5 +203,5 @@ def balance_check(book_file, entity_map_file, as_of):
         sys.exit(1)
     except Exception as e:
         logger.error(f"Error during balance check: {e}", exc_info=True)
-        click.echo(f"\n✗ Balance check failed: {e}")
+        click.echo(f"\n[X] Balance check failed: {e}")
         sys.exit(1)

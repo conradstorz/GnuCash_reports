@@ -124,7 +124,7 @@ class ValidationResult:
         Logs all problems and provides counts.
         """
         if not self.problems:
-            logger.info("✓ Validation passed with no issues")
+            logger.info("[OK] Validation passed with no issues")
             return
         
         logger.info(f"Validation completed: {self.error_count} error(s), {self.warning_count} warning(s)")
@@ -138,9 +138,9 @@ class ValidationResult:
         
         # Final summary
         if self.has_errors:
-            logger.error(f"✗ Validation FAILED with {self.error_count} error(s)")
+            logger.error(f"[X] Validation FAILED with {self.error_count} error(s)")
         else:
-            logger.info(f"✓ Validation passed (with {self.warning_count} warning(s))")
+            logger.info(f"[OK] Validation passed (with {self.warning_count} warning(s))")
     
     def format_as_text(self, strict_mode: bool = False) -> str:
         """
@@ -366,7 +366,7 @@ def validate_accounts(
             )
     else:
         if not quiet:
-            logger.info("✓ All accounts have entity mappings")
+            logger.info("[OK] All accounts have entity mappings")
     
     # Log entity distribution
     if entity_counts and not quiet:
@@ -457,12 +457,12 @@ def validate_transactions(
         logger.info(f"Processed {total_transactions} transactions")
     
         if data_integrity_errors > 0:
-            logger.error(f"✗ Found {data_integrity_errors} data integrity error(s) - fix these in GnuCash")
+            logger.error(f"[X] Found {data_integrity_errors} data integrity error(s) - fix these in GnuCash")
     
         if unbalanced_count == 0 and data_integrity_errors == 0:
-            logger.info("✓ All transactions are balanced (within tolerance)")
+            logger.info("[OK] All transactions are balanced (within tolerance)")
         elif unbalanced_count > 0:
-            logger.error(f"✗ Found {unbalanced_count} unbalanced transaction(s)")
+            logger.error(f"[X] Found {unbalanced_count} unbalanced transaction(s)")
 
 
 def scan_unmapped_accounts(
@@ -628,6 +628,6 @@ def validate_for_reporting(
         logger.error(error_msg)
         raise RuntimeError(error_msg)
     
-    logger.info("✓ Strict validation passed - ready for report generation")
+    logger.info("[OK] Strict validation passed - ready for report generation")
     
     return result

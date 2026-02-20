@@ -440,11 +440,11 @@ def format_comparison_text(changes: dict) -> str:
                 lines.append("   CHANGES:")
                 for field, change in fix_summary.items():
                     if field == "error_resolved":
-                        lines.append(f"     ✓ Resolved: {change}")
+                        lines.append(f"     [OK] Resolved: {change}")
                     elif isinstance(change, dict):
-                        lines.append(f"     ✓ {field}: '{change['before']}' → '{change['after']}'")
+                        lines.append(f"     [OK] {field}: '{change['before']}' -> '{change['after']}'")
                     else:
-                        lines.append(f"     ✓ {field}: {change}")
+                        lines.append(f"     [OK] {field}: {change}")
                 lines.append("")
     
     # Broken transactions

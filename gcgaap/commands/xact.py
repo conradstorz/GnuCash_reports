@@ -259,7 +259,7 @@ def balance(book_file, entity_map_file, entity, date_from, date_to, dry_run):
         else:
             click.echo(f"\n[OK] Successfully balanced: {fixed_count} transaction(s)")
             if failed_count > 0:
-                click.echo(f"✗ Failed to balance: {failed_count} transaction(s)")
+                click.echo(f"[X] Failed to balance: {failed_count} transaction(s)")
 
             if fixed_count > 0:
                 click.echo("\nChanges have been saved to the GnuCash database.")

@@ -83,19 +83,19 @@ def scan(book_file, entity_map_file):
                 entities_without_balancing.append(status)
 
         if entities_with_balancing:
-            click.echo("✓ Entities WITH cross-entity balancing accounts:")
+            click.echo("[OK] Entities WITH cross-entity balancing accounts:")
             click.echo()
             for status in entities_with_balancing:
-                click.echo(f"  ✓ {status.entity_label} ({status.entity_key})")
+                click.echo(f"  [OK] {status.entity_label} ({status.entity_key})")
                 for account_name in status.balancing_accounts:
                     click.echo(f"      - {account_name}")
             click.echo()
 
         if entities_without_balancing:
-            click.echo("⚠ Entities WITHOUT cross-entity balancing accounts:")
+            click.echo("[!] Entities WITHOUT cross-entity balancing accounts:")
             click.echo()
             for status in entities_without_balancing:
-                click.echo(f"  ⚠ {status.entity_label} ({status.entity_key})")
+                click.echo(f"  [!] {status.entity_label} ({status.entity_key})")
             click.echo()
             click.echo("Consider creating cross-entity balancing equity accounts for these entities")
             click.echo("if they participate in cross-entity transactions (e.g., shared credit cards).")
@@ -159,7 +159,7 @@ def infer(book_file, entity_map_file, output_file, merge):
             click.echo(f"  {note}")
 
         if not result.suggestions:
-            click.echo("\n⚠ No entity patterns detected. Your book may need manual mapping.")
+            click.echo("\n[!] No entity patterns detected. Your book may need manual mapping.")
             sys.exit(0)
 
         click.echo(f"\n=== Suggested Entities ({len(result.suggestions)}) ===\n")

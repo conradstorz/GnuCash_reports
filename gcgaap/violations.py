@@ -541,7 +541,7 @@ def format_violations_report(report: ViolationsReport) -> str:
         lines.append("-" * 80)
         
         for entity_key, info in sorted(report.entity_balances.items()):
-            status = "✓ OK" if info.is_balanced() else "✗ FAIL"
+            status = "[OK]" if info.is_balanced() else "[FAIL]"
             lines.append(
                 f"{info.entity_label[:30]:<30} "
                 f"{info.account_count:>8} "
@@ -596,7 +596,7 @@ def format_violations_report(report: ViolationsReport) -> str:
     else:
         lines.append("NO VIOLATIONS FOUND")
         lines.append("-" * 80)
-        lines.append("✓ All validation checks passed!")
+        lines.append("[OK] All validation checks passed!")
         lines.append("")
     
     # Recommendations

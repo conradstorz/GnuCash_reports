@@ -423,7 +423,7 @@ class CrossEntityAnalysis:
         imbalanced_entities = self.get_entities_with_imbalances()
         
         if not imbalanced_entities:
-            lines.append("✓ All entities are balanced. No action needed.")
+            lines.append("[OK] All entities are balanced. No action needed.")
             lines.append("")
             return "\n".join(lines)
         
