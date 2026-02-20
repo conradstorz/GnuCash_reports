@@ -19,7 +19,27 @@ from ..reports.balance_sheet import (
     format_as_json,
     check_entity_balance,
 )
-from ._options import book_file_option, entity_map_option, as_of_option
+from ..reports.income_statement import (
+    generate_income_statement,
+    format_as_text as is_format_text,
+    format_as_csv as is_format_csv,
+    format_as_json as is_format_json,
+)
+from ..reports.trial_balance import (
+    generate_trial_balance,
+    format_as_text as tb_format_text,
+    format_as_csv as tb_format_csv,
+    format_as_json as tb_format_json,
+)
+from ._options import (
+    book_file_option,
+    entity_map_option,
+    as_of_option,
+    from_date_option,
+    to_date_option,
+    format_option,
+    entity_filter_option,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -204,4 +224,139 @@ def balance_check(book_file, entity_map_file, as_of):
     except Exception as e:
         logger.error(f"Error during balance check: {e}", exc_info=True)
         click.echo(f"\n[X] Balance check failed: {e}")
+        sys.exit(1)
+
+
+@report_group.command(name="income-statement")
+@book_file_option
+@entity_map_option()
+@from_date_option(required=True)
+@to_date_option(required=True)
+@entity_filter_option
+@format_option(("text", "csv", "json"))
+def income_statement(book_file, entity_map_file, from_date, to_date, entity, format):
+    """
+    Generate a GAAP-compliant Income Statement for a date range.
+
+    Shows revenues and expenses for the specified period with hierarchical
+    account groupings and subtotals, ending with net income (or net loss).
+
+    The report title adapts to entity type:
+      - Business entities:  Income Statement
+      - Individual entities: Statement of Income and Expenses
+
+    Use --entity to generate a report for one entity, or omit for consolidated.
+    """
+    logger.info("=== GCGAAP Income Statement Report ===")
+
+    try:
+        config = GCGAAPConfig()
+        entity_map = EntityMap.load(entity_map_file)
+
+        if entity and entity not in entity_map.entities:
+            click.echo(f"Error: Entity '{entity}' not found in entity map.")
+            click.echo(f"Available entities: {', '.join(entity_map.entities.keys())}")
+            sys.exit(1)
+
+        with GnuCashBook(book_file) as book:
+            report = generate_income_statement(
+                book=book,
+                entity_map=entity_map,
+                from_date_str=from_date,
+                to_date_str=to_date,
+                entity_key=entity,
+                config=config,
+            )
+
+        if format.lower() == "csv":
+            output = is_format_csv(report)
+        elif format.lower() == "json":
+            output = is_format_json(report)
+        else:
+            output = is_format_text(report)
+
+        click.echo()
+        click.echo(output)
+        sys.exit(0)
+
+    except ValueError as e:
+        logger.error(f"Report generation failed: {e}")
+        click.echo(f"\n[ERROR] {e}")
+        sys.exit(1)
+    except RuntimeError as e:
+        logger.error(f"Validation failed: {e}")
+        click.echo(f"\n[FAIL] VALIDATION FAILED: {e}")
+        click.echo("\nFix validation errors before generating reports.")
+        click.echo("Use 'gcgaap db validate --strict' to see detailed validation results.")
+        sys.exit(1)
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error generating income statement: {e}", exc_info=True)
+        sys.exit(1)
+
+
+@report_group.command(name="trial-balance")
+@book_file_option
+@entity_map_option()
+@as_of_option(required=True)
+@entity_filter_option
+@format_option(("text", "csv", "json"))
+def trial_balance(book_file, entity_map_file, as_of, entity, format):
+    """
+    Generate a Trial Balance as of a specific date.
+
+    Lists all accounts with non-zero balances in debit and credit columns.
+    Total debits must equal total credits for a set of books in balance.
+    Useful as a sanity check before generating other GAAP reports.
+
+    Use --entity to generate a report for one entity, or omit for consolidated.
+    """
+    logger.info("=== GCGAAP Trial Balance Report ===")
+
+    try:
+        config = GCGAAPConfig()
+        entity_map = EntityMap.load(entity_map_file)
+
+        if entity and entity not in entity_map.entities:
+            click.echo(f"Error: Entity '{entity}' not found in entity map.")
+            click.echo(f"Available entities: {', '.join(entity_map.entities.keys())}")
+            sys.exit(1)
+
+        with GnuCashBook(book_file) as book:
+            report = generate_trial_balance(
+                book=book,
+                entity_map=entity_map,
+                as_of_date_str=as_of,
+                entity_key=entity,
+                config=config,
+            )
+
+        if format.lower() == "csv":
+            output = tb_format_csv(report)
+        elif format.lower() == "json":
+            output = tb_format_json(report)
+        else:
+            output = tb_format_text(report)
+
+        click.echo()
+        click.echo(output)
+        sys.exit(0 if report.is_balanced() else 1)
+
+    except ValueError as e:
+        logger.error(f"Report generation failed: {e}")
+        click.echo(f"\n[ERROR] {e}")
+        sys.exit(1)
+    except RuntimeError as e:
+        logger.error(f"Validation failed: {e}")
+        click.echo(f"\n[FAIL] VALIDATION FAILED: {e}")
+        click.echo("\nFix validation errors before generating reports.")
+        click.echo("Use 'gcgaap db validate --strict' to see detailed validation results.")
+        sys.exit(1)
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error generating trial balance: {e}", exc_info=True)
         sys.exit(1)

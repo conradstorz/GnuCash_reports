@@ -111,3 +111,31 @@ class MockBook:
 
     def get_account_balance(self, account_guid: str, as_of_date) -> float:
         return self._balances.get(account_guid, 0.0)
+
+    def get_period_account_balances(
+        self,
+        from_date,
+        to_date,
+        account_guids: list[str] | None = None,
+    ) -> dict[str, float]:
+        from datetime import datetime
+
+        balances: dict[str, float] = {}
+
+        if account_guids is not None:
+            for g in account_guids:
+                balances[g] = 0.0
+        else:
+            for acc in self._accounts:
+                balances[acc.guid] = 0.0
+
+        for txn in self._transactions:
+            txn_date = datetime.strptime(txn.post_date, "%Y-%m-%d").date()
+            if txn_date < from_date or txn_date > to_date:
+                continue
+            for split in txn.splits:
+                if account_guids is not None and split.account_guid not in balances:
+                    continue
+                balances[split.account_guid] = balances.get(split.account_guid, 0.0) + split.value
+
+        return balances

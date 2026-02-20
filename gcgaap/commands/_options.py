@@ -82,6 +82,34 @@ def tolerance_option(func):
     )(func)
 
 
+def from_date_option(required: bool = True):
+    """--from: period start date in YYYY-MM-DD format."""
+    def decorator(func):
+        return click.option(
+            "--from",
+            "from_date",
+            type=str,
+            required=required,
+            default=None,
+            help="Period start date in YYYY-MM-DD format.",
+        )(func)
+    return decorator
+
+
+def to_date_option(required: bool = True):
+    """--to: period end date in YYYY-MM-DD format."""
+    def decorator(func):
+        return click.option(
+            "--to",
+            "to_date",
+            type=str,
+            required=required,
+            default=None,
+            help="Period end date in YYYY-MM-DD format.",
+        )(func)
+    return decorator
+
+
 def output_file_option(required: bool = False, default=None):
     """--output/-o: output file path."""
     def decorator(func):

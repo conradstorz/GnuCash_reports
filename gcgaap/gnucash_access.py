@@ -443,8 +443,66 @@ class GnuCashBook:
         
         return dict(balances)
     
+    def get_period_account_balances(
+        self,
+        from_date: date,
+        to_date: date,
+        account_guids: Optional[list[str]] = None,
+    ) -> dict[str, float]:
+        """
+        Calculate account balances for transactions within a specific date period.
+
+        Only includes transactions where from_date <= post_date <= to_date.
+        Useful for flow accounts (INCOME, EXPENSE) that report activity over a period
+        rather than cumulative position.
+
+        Args:
+            from_date: Start of the period (inclusive).
+            to_date: End of the period (inclusive).
+            account_guids: Optional list of specific account GUIDs to calculate.
+                          If None, calculates for all accounts.
+
+        Returns:
+            Dictionary mapping account GUID to balance (float).
+
+        Raises:
+            RuntimeError: If called outside of context manager.
+        """
+        if self._book is None:
+            raise RuntimeError("Book not opened. Use within 'with' statement.")
+
+        logger.debug(f"Calculating account balances for period {from_date} to {to_date}")
+
+        balances = defaultdict(float)
+
+        if account_guids:
+            for guid in account_guids:
+                balances[guid] = 0.0
+        else:
+            for account in self.iter_accounts():
+                balances[account.guid] = 0.0
+
+        transaction_count = 0
+        for transaction in self.iter_transactions():
+            txn_date = datetime.strptime(transaction.post_date, "%Y-%m-%d").date()
+
+            if txn_date < from_date or txn_date > to_date:
+                continue
+
+            transaction_count += 1
+            for split in transaction.splits:
+                if account_guids and split.account_guid not in account_guids:
+                    continue
+                balances[split.account_guid] += split.value
+
+        logger.debug(
+            f"Processed {transaction_count} transactions for period balance calculation"
+        )
+
+        return dict(balances)
+
     def get_account_balance(
-        self, 
+        self,
         account_guid: str,
         as_of_date: date
     ) -> float:
