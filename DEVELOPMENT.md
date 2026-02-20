@@ -6,15 +6,42 @@
 gcgaap/
 ├── gcgaap/                 # Main package
 │   ├── __init__.py         # Package initialization
-│   ├── cli.py              # Command-line interface (Click-based)
+│   ├── cli.py              # Main CLI entry point (54 lines)
 │   ├── config.py           # Configuration and logging setup
 │   ├── entity_map.py       # Entity mapping logic
 │   ├── entity_inference.py # Smart entity inference (Phase 1.1)
 │   ├── gnucash_access.py   # GnuCash data access abstraction
 │   ├── validate.py         # Validation engine
-│   └── reports/            # Report modules
+│   ├── violations.py       # Violation reporting
+│   ├── balance_xacts.py    # Cross-entity transaction balancing
+│   ├── cross_entity.py     # Cross-entity transaction analysis
+│   ├── repair.py           # Database repair utilities
+│   ├── snapshot.py         # Database snapshot and diff
+│   ├── commands/           # Modular CLI commands
+│   │   ├── __init__.py
+│   │   ├── _options.py      # Shared Click option decorators
+│   │   ├── db.py            # Database operations (408 lines)
+│   │   ├── entity.py        # Entity management (319 lines)
+│   │   ├── report.py        # Report generation (207 lines)
+│   │   └── xact.py          # Transaction operations (278 lines)
+│   ├── reports/            # Report modules
+│   │   ├── __init__.py
+│   │   └── balance_sheet.py
+│   └── tools/              # Utility tools
 │       ├── __init__.py
-│       └── balance_sheet.py
+│       ├── display_entity_tree.py
+│       └── entity_account_mapper.py
+├── tests/                  # Test suite (236 tests, 2,676 lines)
+│   ├── __init__.py
+│   ├── conftest.py         # Pytest fixtures
+│   ├── helpers.py          # Test utilities
+│   ├── test_balance_sheet.py  (624 lines)
+│   ├── test_cli.py         (228 lines)
+│   ├── test_config.py      (75 lines)
+│   ├── test_entity_map.py  (239 lines)
+│   ├── test_gnucash_access.py (555 lines)
+│   ├── test_repair.py      (343 lines)
+│   └── test_validate.py    (612 lines)
 ├── pyproject.toml          # Project configuration and dependencies
 ├── README.md               # User documentation
 └── DEVELOPMENT.md          # This file
@@ -97,11 +124,53 @@ balance = lambda s: sum(x.value for x in s if x.value != 0)
 
 ## Testing
 
-(To be implemented)
+### Comprehensive Test Suite
+
+The project includes 236 automated tests across 7 test files:
 
 ```bash
+# Run all tests
 pytest
+
+# Run tests with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/test_balance_sheet.py
+
+# Run tests matching a pattern
+pytest -k "test_validation"
 ```
+
+### Test Structure
+
+- **conftest.py**: Pytest fixtures including mock GnuCash books
+- **helpers.py**: Shared test utilities
+- **test_validate.py** (612 lines): Validation logic, all 7 violation types
+- **test_balance_sheet.py** (624 lines): Balance sheet calculations, GAAP compliance
+- **test_gnucash_access.py** (555 lines): Database access layer, data models
+- **test_repair.py** (343 lines): Date repair, database modifications
+- **test_entity_map.py** (239 lines): Entity mapping, pattern matching
+- **test_cli.py** (228 lines): CLI interface, command integration
+- **test_config.py** (75 lines): Configuration, logging
+
+### Writing Tests
+
+Tests use pytest with fixtures for isolation:
+
+```python
+def test_balance_sheet_calculates_correctly(mock_book):
+    """Test that balance sheet computes correct totals."""
+    # Use mock_book fixture from conftest.py
+    result = generate_balance_sheet(mock_book, as_of="2026-12-31")
+    assert result.total_assets == result.total_liabilities + result.total_equity
+```
+
+### Future Testing Priorities
+
+- [ ] Add dedicated test_balance_xacts.py (50+ tests for transaction balancing)
+- [ ] Configure pytest-cov for coverage reporting
+- [ ] Target 85%+ coverage for core modules
 
 ## Code Formatting
 
@@ -126,12 +195,20 @@ ruff check gcgaap/
 - **Business logic** (`validate.py`, `entity_map.py`): Core accounting rules
 - **Reporting** (`reports/`): Report generation and formatting
 
-### Read-Only Operations
+### Read-Only by Default
 
-**CRITICAL**: All GnuCash operations must be read-only. The tool NEVER modifies the book.
+**Most operations are read-only**, but two commands modify the database (with automatic backups):
 
-- `GnuCashBook` opens files with `readonly=True`
-- No write operations are exposed
+- **Read-only commands**: All validation, reporting, and scanning operations
+- **Write commands** (create backup first):
+  - `db repair-dates`: Fixes empty date fields
+  - `xact balance`: Adds balancing splits to cross-entity transactions
+
+Both write commands:
+1. Create automatic timestamped backups before modifications
+2. Use `readonly=False` explicitly
+3. Provide dry-run mode for preview
+4. Require user confirmation (interactive approval)
 
 ### Error Handling
 
@@ -142,14 +219,14 @@ ruff check gcgaap/
 
 ## Implementation Phases
 
-### Phase 1 (Complete)
+### Phase 1 (Complete ✅)
 - ✅ Project setup and structure
 - ✅ Entity mapping (load/save/resolve)
 - ✅ GnuCash data access abstraction
 - ✅ Validation engine (transaction balancing, account mapping)
 - ✅ CLI with `entity-scan` and `validate` commands
 
-### Phase 1.1 (Complete - NEW!)
+### Phase 1.1 (Complete ✅)
 - ✅ Smart entity inference with pattern analysis
 - ✅ AI-powered entity detection from account names
 - ✅ Business entity identification (LLC, Inc, Corp, etc.)
@@ -157,21 +234,33 @@ ruff check gcgaap/
 - ✅ Confidence scoring and pattern generation
 - ✅ CLI `entity-infer` command with merge capability
 
-### Phase 2 (NEXT)
-- [ ] Extend `GnuCashBook` to compute account balances as of a date
-- [ ] Implement Balance Sheet classification and aggregation
-- [ ] Add `report balance-sheet` command
-- [ ] Implement accounting equation check (A = L + E)
+### Phase 2 (Complete ✅)
+- ✅ Extended `GnuCashBook` to compute account balances as of a date
+- ✅ Balance Sheet classification and aggregation
+- ✅ `report balance-sheet` command
+- ✅ Accounting equation check (A = L + E)
+- ✅ `report balance-check` quick validation command
 
-### Phase 3 (FUTURE)
-- [ ] Entity-level Balance Sheet validation
-- [ ] Consolidated vs. sum-of-entities verification
-- [ ] Additional validation rules
+### Phase 3 (Complete ✅)
+- ✅ Entity-level Balance Sheet validation
+- ✅ Consolidated vs. sum-of-entities verification
+- ✅ Cross-entity transaction analysis
+- ✅ Automated cross-entity transaction balancing
+- ✅ Comprehensive test suite (236 tests)
+- ✅ CLI refactoring into modular command structure
 
-### Phase 4 (FUTURE)
-- [ ] Income Statement
+### Phase 4 (Complete ✅)
+- ✅ Income Statement / P&L report
+- ✅ Trial Balance report
+- ✅ Database snapshot and diff utilities
+- ✅ Comprehensive violation reporting
+
+### Phase 5 (Future 📅)
 - [ ] Cash Flow Statement
-- [ ] Additional reports
+- [ ] Budget tracking and comparison
+- [ ] Multi-currency support
+- [ ] PDF report export
+- [ ] Additional export formats (Excel, etc.)
 
 ## Common Development Tasks
 

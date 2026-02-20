@@ -3,6 +3,8 @@
 **Generated:** February 16, 2026
 **Source:** Cross-Entity Transaction Analysis
 
+> **NOTE:** As of version 0.3.0, the `gcgaap xact balance` command can automatically fix most cross-entity transaction imbalances. See [BALANCE_XACTS_USAGE.md](BALANCE_XACTS_USAGE.md) for details. This document describes the manual process for complex cases or for understanding the underlying mechanics.
+
 ## Summary of Imbalances
 
 Based on the analysis of 680 cross-entity transactions:

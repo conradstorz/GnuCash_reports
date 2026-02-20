@@ -91,6 +91,34 @@ Add `--verbose` for detailed logging:
 gcgaap validate --file path\to\your\book.gnucash --entity-map entity-map.json --verbose
 ```
 
+### 6. Generate Financial Reports
+
+```powershell
+# Balance Sheet (as of a specific date)
+gcgaap report balance-sheet --file path\to\your\book.gnucash --entity-map entity-map.json --as-of 2026-12-31
+
+# Income Statement / P&L (for a date range)
+gcgaap report income-statement --file path\to\your\book.gnucash --entity-map entity-map.json --from 2026-01-01 --to 2026-12-31
+
+# Trial Balance (sanity check that debits = credits)
+gcgaap report trial-balance --file path\to\your\book.gnucash --entity-map entity-map.json --as-of 2026-12-31
+
+# Entity-specific reports (add --entity flag)
+gcgaap report balance-sheet --file path\to\your\book.gnucash --entity-map entity-map.json --as-of 2026-12-31 --entity my_business
+```
+
+### 7. Fix Cross-Entity Transaction Imbalances
+
+```powershell
+# Preview what would be fixed (safe dry-run)
+gcgaap xact balance --file path\to\your\book.gnucash --entity-map entity-map.json --dry-run
+
+# Actually balance transactions (creates backup first, interactive approval)
+gcgaap xact balance --file path\to\your\book.gnucash --entity-map entity-map.json
+```
+
+This automatically adds balancing splits to 2-split cross-entity transactions using inter-entity equity accounts ("Money In" / "Money Out").
+
 ## Common Workflows
 
 ### Initial Setup with a New Book
