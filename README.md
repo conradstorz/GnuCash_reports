@@ -11,13 +11,17 @@ GCGAAP helps you:
 3. **Generate accurate financial reports** with strict accounting equation enforcement
 4. **Repair common database issues** that prevent proper reading of GnuCash files
 
-All operations are **read-only** – GCGAAP never modifies your GnuCash file (except the repair-dates command which creates a backup first).
+Most operations are **read-only**. Only two commands modify your GnuCash file, and both create automatic backups first:
+- `db repair-dates` – Fixes empty date fields
+- `xact balance` – Adds balancing splits to cross-entity transactions
 
 ## Key Features
 
 - ✅ **Data quality validation** – Find imbalanced transactions, unmapped accounts, and integrity issues
 - ✅ **Smart entity detection** – AI-powered analysis suggests how to map accounts to entities
-- ✅ **Balance Sheet reports** – GAAP-compliant reports with accounting equation verification
+- ✅ **Automated transaction balancing** – Automatically fix cross-entity transactions with missing balancing splits
+- ✅ **Comprehensive financial reports** – Balance Sheet, Income Statement, Trial Balance
+- ✅ **GAAP compliance** – All reports enforce strict accounting equation verification
 - ✅ **Database repair** – Fix empty date fields that prevent piecash from reading transactions
 - ✅ **Database snapshots** – Track changes to your GnuCash file over time
 - ✅ **Multi-entity support** – Handle multiple businesses or individuals in one GnuCash file
@@ -143,6 +147,47 @@ gcgaap xact cross-entity --file mybook.gnucash --entity-map entity-map.json --as
 
 # Show simplified one-line format
 gcgaap xact cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --simple
+```
+
+**Automatically balance cross-entity transactions**
+
+```bash
+# Preview what would be balanced (dry-run mode)
+gcgaap xact balance --file mybook.gnucash --entity-map entity-map.json --dry-run
+
+# Balance all transactions (with interactive approval)
+gcgaap xact balance --file mybook.gnucash --entity-map entity-map.json
+
+# Balance transactions for specific entity only
+gcgaap xact balance --file mybook.gnucash --entity-map entity-map.json --entity my_business
+
+# Balance transactions within a date range
+gcgaap xact balance --file mybook.gnucash --entity-map entity-map.json --date-from 2026-01-01 --date-to 2026-12-31
+```
+
+This command identifies 2-split cross-entity transactions and adds balancing splits using inter-entity equity accounts ("Money In" and "Money Out"). A backup is automatically created before any changes.
+
+**Generate Income Statement (P&L)**
+
+```bash
+# Consolidated income statement
+gcgaap report income-statement --file mybook.gnucash --entity-map entity-map.json --from 2026-01-01 --to 2026-12-31
+
+# Entity-specific income statement
+gcgaap report income-statement --file mybook.gnucash --entity-map entity-map.json --from 2026-01-01 --to 2026-12-31 --entity my_business
+
+# Export as CSV
+gcgaap report income-statement --file mybook.gnucash --entity-map entity-map.json --from 2026-01-01 --to 2026-12-31 --format csv
+```
+
+**Generate Trial Balance**
+
+```bash
+# Consolidated trial balance
+gcgaap report trial-balance --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31
+
+# Entity-specific trial balance
+gcgaap report trial-balance --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31 --entity my_business
 ```
 
 **Track database changes**
@@ -273,9 +318,17 @@ This scans all accounts and maps them based on naming patterns with parent-child
 | `entity remap` | Regenerate entity mapping | `gcgaap entity remap --file mybook.gnucash --output entity-map.json` |
 | `db violations` | Data quality report | `gcgaap db violations --file mybook.gnucash --as-of 2026-12-31` |
 | `db validate` | Validate book integrity | `gcgaap db validate --file mybook.gnucash --entity-map entity-map.json --strict` |
-| `report balance-check` | Quick balance check | `gcgaap report balance-check --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
+| `report balance-check` | Quick balance check for all entities | `gcgaap report balance-check --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
 | `report balance-sheet` | Generate balance sheet | `gcgaap report balance-sheet --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
+| `report income-statement` | Generate income statement (P&L) | `gcgaap report income-statement --file mybook.gnucash --entity-map entity-map.json --from 2026-01-01 --to 2026-12-31` |
+| `report trial-balance` | Generate trial balance | `gcgaap report trial-balance --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
 | `xact cross-entity` | Analyze cross-entity transactions | `gcgaap xact cross-entity --file mybook.gnucash --entity-map entity-map.json --as-of 2026-12-31` |
+| `xact balance` | Auto-balance cross-entity transactions | `gcgaap xact balance --file mybook.gnucash --entity-map entity-map.json --dry-run` |
+
+## Troubleshooting
+
+### "Transaction has invalid date"
+
 This error means your GnuCash database has empty date fields. Fix it with:
 
 ```bash
